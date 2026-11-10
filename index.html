@@ -6,7 +6,7 @@
 <title>Crystal City Productions — Video, Editing &amp; Social Media Marketing | Dallas &middot; New York &middot; Los Angeles</title>
 <meta name="description" content="Crystal City Productions: video production, editing, social media management and targeted ads. Hire us for one piece or the whole system. Dallas–Fort Worth, New York, Los Angeles and worldwide.">
 <meta property="og:title" content="Crystal City Productions">
-<meta property="og:description" content="We film it. We edit it. We amplify it. Video, editing, social media management and targeted ads, from Dallas, New York and Los Angeles.">
+<meta property="og:description" content="We film it. We cut it. We boost it. Video, editing, social media management and targeted ads, from Dallas, New York and Los Angeles.">
 <meta property="og:image" content="assets/logo.png">
 <meta name="theme-color" content="#08080A">
 <link rel="icon" href="assets/logo.png">
@@ -517,6 +517,22 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
   .w-item.tall .w-frame{max-width:340px}
   .w-item.tall .w-cap{max-width:340px}
 }
+
+/* ============================================================
+   V7 — alignment + contrast polish
+   ============================================================ */
+:root{--mute-2:rgba(243,239,230,.5)}
+.sec{padding:clamp(56px,6.5vw,92px) 0}
+.w-item{margin:0}
+.w-cap{display:grid; grid-template-columns:1fr auto; align-items:baseline; column-gap:18px; row-gap:8px}
+.w-cap b{grid-column:1/-1}
+.w-cap small{justify-self:start}
+.kinds{color:var(--mute)}
+@media (max-width:700px){
+  .hero .eyebrow{font-size:10px; letter-spacing:.2em; gap:10px}
+  .hero .eyebrow::before,.hero .eyebrow::after{width:18px; flex:none}
+  .hero .eyebrow .ww{display:none}
+}
 </style>
 </head>
 <body>
@@ -560,14 +576,14 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
   </div>
 
   <div class="wrap hero-in hero-center">
-    <span class="eyebrow center rise d1">Dallas &middot; New York &middot; Los Angeles &middot; Worldwide</span>
+    <span class="eyebrow center rise d1">Dallas &middot; New&nbsp;York &middot; Los&nbsp;Angeles<span class="ww">&nbsp;&middot; Worldwide</span></span>
     <h1>
       <span class="ln rise d2">We film it.</span>
-      <span class="ln rise d3">We edit it.</span>
-      <span class="ln rise d4">We <em>amplify</em> it.</span>
+      <span class="ln rise d3">We cut it.</span>
+      <span class="ln rise d4">We <em>boost</em> it.</span>
     </h1>
     <p class="lede rise d5">Pick one piece or the full system, including social media management and targeted ads.</p>
-    <p class="kinds rise d5">Commercials &middot; Real estate &middot; Events &middot; Short films &middot; Documentaries &middot; Music videos</p>
+    <p class="kinds rise d5">Commercials&nbsp;&middot; Real&nbsp;estate&nbsp;&middot; Events&nbsp;&middot; Short&nbsp;films&nbsp;&middot; Documentaries&nbsp;&middot; Music&nbsp;videos</p>
     <div class="hero-cta rise d6">
       <a href="#quote" class="btn solid"><span>Get a Quote</span></a>
       <a href="#work" class="btn ghost"><span>See the Work</span></a>
@@ -711,7 +727,7 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
     </div>
     <dl class="c-grid rv">
       <div><dt>Email</dt><dd><a href="mailto:crystalcityprod@gmail.com">crystalcityprod@gmail.com</a></dd></div>
-      <div><dt>Where We Work</dt><dd>Dallas&ndash;Fort Worth &middot; New York &middot; Los Angeles<span class="dd-sub">Available for production worldwide &mdash; travel quoted per project.</span></dd></div>
+      <div><dt>Where We Work</dt><dd>Dallas&ndash;Fort&nbsp;Worth<br>New&nbsp;York &middot; Los&nbsp;Angeles<span class="dd-sub">Available for production worldwide &mdash; travel quoted per project.</span></dd></div>
       <div><dt>Instagram</dt><dd><a href="https://instagram.com/crystalcityproductions" target="_blank" rel="noopener">@crystalcityproductions</a></dd></div>
     </dl>
   </div>
@@ -738,7 +754,7 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
     </div>
     <div class="f-bot">
       <span>&copy; <span id="yr"></span> Crystal City Productions LLC</span>
-      <span>Dallas&ndash;Fort Worth &middot; New York &middot; Los Angeles &middot; Worldwide</span>
+      <span>Dallas&ndash;Fort&nbsp;Worth&nbsp;&middot; New&nbsp;York&nbsp;&middot; Los&nbsp;Angeles&nbsp;&middot; Worldwide</span>
     </div>
   </div>
 </footer>
@@ -876,7 +892,7 @@ const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
 const WORK = [
   { id:"1cIVguI1oONkX9yk-FSC-76RHHkSX3v2q", tag:"Brand Feature",  title:"Phreeart",             ratio:"16/9", size:"wide" },
   { id:"13Q0YNS_5Ri5wg2nOdQiX6W8GLToPt9YV", tag:"Creator Reel",   title:"VK — Reel Series",     ratio:"9/16", size:"tall" },
-  { id:"1K0_SYcpa8WY8nrdGtXdT2uBwPInAmwF-", tag:"Community Film", title:"Interfaith Gathering", ratio:"16/9", size:"full" }
+  { id:"1K0_SYcpa8WY8nrdGtXdT2uBwPInAmwF-", tag:"Community Film", title:"Interfaith Gathering", ratio:"21/9", size:"full" }
 ];
 
 document.getElementById('workGrid').innerHTML = WORK.map(v => `

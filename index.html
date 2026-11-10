@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Crystal City Productions — Content Systems for Brands, Businesses &amp; Communities | Dallas &middot; New York &middot; Los Angeles</title>
-<meta name="description" content="Crystal City Productions is a video and media company with crews in Dallas–Fort Worth, New York and Los Angeles — and the ability to produce anywhere in the world. High-quality content systems for businesses, mosques, influencers and real estate brands.">
+<title>Crystal City Productions — Video, Editing &amp; Social Media Marketing | Dallas &middot; New York &middot; Los Angeles</title>
+<meta name="description" content="Crystal City Productions: video production, editing, social media management and targeted ads. Hire us for one piece or the whole system. Dallas–Fort Worth, New York, Los Angeles and worldwide.">
 <meta property="og:title" content="Crystal City Productions">
-<meta property="og:description" content="High-quality content systems for businesses, mosques, influencers and real estate brands. Dallas–Fort Worth · New York · Los Angeles · Worldwide.">
+<meta property="og:description" content="We film it. We edit it. We grow it. Video, editing, social media management and targeted ads, from Dallas, New York and Los Angeles.">
 <meta property="og:image" content="assets/logo.png">
 <meta name="theme-color" content="#08080A">
 <link rel="icon" href="assets/logo.png">
@@ -449,6 +449,74 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
   *{animation-duration:.01ms !important; transition-duration:.01ms !important}
   .rise,.rv{opacity:1 !important; transform:none !important}
 }
+
+/* ============================================================
+   V6 — spectrum layout, calmer hero, mobile-first fixes
+   ============================================================ */
+.sec{padding:clamp(60px,8vw,110px) 0}
+.hero{min-height:min(100svh,820px); padding:132px 0 76px}
+.hero h1{font-size:clamp(44px,7.4vw,104px); line-height:1.02; margin:22px 0 0}
+.hero .lede{margin-top:26px; max-width:46ch}
+.kinds{margin:20px auto 0; max-width:34em; font-size:11.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--mute-2); line-height:1.9}
+.hero-cta{margin-top:34px}
+
+.spec{display:grid; grid-template-columns:3fr 2fr; gap:clamp(28px,4vw,64px)}
+.grp-label{display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding-bottom:14px; border-bottom:1px solid var(--ink-line);
+  font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold)}
+.grp-label small{font-size:10px; letter-spacing:.2em; color:var(--mute-2)}
+.stops{display:grid}
+.grp:first-child .stops{grid-template-columns:repeat(3,1fr)}
+.grp:last-child .stops{grid-template-columns:repeat(2,1fr)}
+.stop{padding:28px clamp(14px,2vw,28px) 0 0}
+.stop-n{display:block; margin-bottom:14px; font-family:var(--display); font-size:13px; letter-spacing:.24em; color:var(--gold-deep)}
+.stop h3{margin-bottom:10px}
+.stop p{margin:0; font-size:15px; color:var(--mute)}
+.spec-note{margin:clamp(30px,4vw,48px) 0 0; padding:20px 24px; border:1px solid var(--ink-line);
+  background:linear-gradient(100deg,rgba(233,188,83,.07),transparent); font-size:15.5px; color:var(--mute)}
+.spec-note b{font-weight:400; color:var(--gold)}
+.kind-head{margin-top:clamp(44px,6vw,76px); margin-bottom:22px}
+.kind-grid{display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--ink-line); border-left:1px solid var(--ink-line)}
+.kind-grid div{padding:22px 20px; border-right:1px solid var(--ink-line); border-bottom:1px solid var(--ink-line);
+  font-family:var(--display); font-weight:300; font-size:clamp(15px,1.4vw,18px); line-height:1.3}
+
+.w-open{font-size:9.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--mute-2); white-space:nowrap; transition:color .35s var(--ease)}
+.w-open:hover{color:var(--gold)}
+.w-cap{flex-wrap:wrap}
+
+@media (max-width:860px){
+  .spec{grid-template-columns:1fr; gap:30px}
+  .grp:first-child .stops,.grp:last-child .stops{grid-template-columns:1fr}
+  .stop{position:relative; padding:18px 0 18px 22px; border-left:1px solid var(--ink-line); margin-left:3px}
+  .stop::before{content:""; position:absolute; left:-4px; top:25px; width:7px; height:7px; background:var(--gold); transform:rotate(45deg)}
+  .stop-n{display:inline; margin:0 10px 0 0; font-size:12px}
+  .stop h3{display:inline; font-size:19px}
+  .stop p{margin-top:8px; font-size:14.5px}
+  .kind-grid{grid-template-columns:repeat(2,1fr)}
+  .kind-grid div{padding:18px 16px}
+}
+@media (max-width:700px){
+  .hero{min-height:0; padding:104px 0 54px}
+  .hero h1{font-size:clamp(42px,12.5vw,60px)}
+  .hero .lede{font-size:16px; margin-top:20px}
+  .kinds{font-size:10.5px; letter-spacing:.14em; margin-top:16px}
+  .hero-cta{margin-top:26px; gap:12px}
+  .hero-cta .btn{width:100%}
+  .skyline{opacity:.2; height:30vh}
+  .grid{opacity:.3}
+  .sec-head{margin-bottom:34px}
+  h2{font-size:clamp(30px,9vw,40px)}
+  .lede{font-size:15.5px}
+  .spec-note{padding:16px 18px; font-size:14.5px}
+
+  /* video: full-width, taller frame so the Drive player has room to sit centered */
+  .work-grid{gap:34px}
+  .w-item.wide,.w-item.full{margin-inline:calc(var(--gutter) * -1)}
+  .w-item.wide .w-frame,.w-item.full .w-frame{aspect-ratio:4/3; border-inline:0}
+  .w-item.wide .w-cap,.w-item.full .w-cap{margin-inline:var(--gutter)}
+  .w-frame .cnr{display:none}
+  .w-item.tall .w-frame{max-width:340px}
+  .w-item.tall .w-cap{max-width:340px}
+}
 </style>
 </head>
 <body>
@@ -463,7 +531,6 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
     <nav class="nav-links">
       <a href="#services">Services</a>
       <a href="#work">Work</a>
-      <a href="#process">Process</a>
       <a href="#faq">FAQ</a>
     </nav>
     <div class="nav-cta">
@@ -476,10 +543,9 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
 <div class="mobile-menu" id="mobileMenu">
   <a href="#services"><span>01</span>Services</a>
   <a href="#work"><span>02</span>Work</a>
-  <a href="#process"><span>03</span>Process</a>
-  <a href="#faq"><span>04</span>FAQ</a>
-  <a href="#quote"><span>05</span>Get a Quote</a>
-  <a href="#contact"><span>06</span>Contact</a>
+  <a href="#faq"><span>03</span>FAQ</a>
+  <a href="#quote"><span>04</span>Get a Quote</a>
+  <a href="#contact"><span>05</span>Contact</a>
 </div>
 
 <!-- ===================== HERO ===================== -->
@@ -494,36 +560,20 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
   </div>
 
   <div class="wrap hero-in hero-center">
-    <img class="hero-mark rise d1" src="assets/logo-transparent.png" alt="">
-    <span class="eyebrow center rise d2">Dallas &middot; New York &middot; Los Angeles</span>
+    <span class="eyebrow center rise d1">Dallas &middot; New York &middot; Los Angeles &middot; Worldwide</span>
     <h1>
-      <span class="ln rise d3">Content that</span>
-      <span class="ln rise d4"><em>builds</em> empires</span>
+      <span class="ln rise d2">We film it.</span>
+      <span class="ln rise d3">We edit it.</span>
+      <span class="ln rise d4">We <em>grow</em> it.</span>
     </h1>
-    <p class="lede rise d5">
-      Crystal City Productions is a full-service media partner for businesses, mosques,
-      influencers and real estate brands. We film it, cut it, publish it, and give you the
-      strategy behind it — every single month. Crews in Dallas&ndash;Fort Worth, New York and
-      Los Angeles, and production anywhere in the world you need us.
-    </p>
+    <p class="lede rise d5">Video production, editing, social media management and targeted ads. Hire us for one piece, or the whole system.</p>
+    <p class="kinds rise d5">Commercials &middot; Real estate &middot; Events &middot; Short films &middot; Documentaries &middot; Music videos</p>
     <div class="hero-cta rise d6">
       <a href="#quote" class="btn solid"><span>Get a Quote</span></a>
-      <a href="#contact" class="btn ghost"><span>Talk to Us First</span></a>
-    </div>
-
-    <div class="hero-meta rise d6">
-      <div><b>100%</b><small>Done For You</small></div>
-      <div><b>24h</b><small>Rush Turnaround</small></div>
-      <div><b>5</b><small>Platforms Published</small></div>
-      <div><b>3</b><small>Cities &amp; Worldwide</small></div>
+      <a href="#work" class="btn ghost"><span>See the Work</span></a>
     </div>
   </div>
 </section>
-
-<!-- ===================== MARQUEE ===================== -->
-<div class="marquee" aria-hidden="true">
-  <div class="marquee-track" id="mq"></div>
-</div>
 
 <!-- ===================== SERVICES ===================== -->
 <section class="sec" id="services">
@@ -531,51 +581,35 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
     <div class="sec-head rv">
       <div>
         <span class="eyebrow">What We Do</span>
-        <h2>A media department,<br>without the payroll.</h2>
+        <h2>Video, editing,<br>or the whole system.</h2>
       </div>
-      <p class="lede">Most brands don't have a content problem — they have a system problem.
-      We build the system: consistent filming days, a real editing pipeline, branded templates,
-      and a publishing calendar that never goes quiet. Shot in Dallas, New York, LA — or wherever
-      your story happens to be.</p>
+      <p class="lede">Start at any point on the line. Video only, editing only, or everything through to paid growth. It&rsquo;s all one team.</p>
     </div>
 
-    <div class="svc-grid">
-      <article class="svc rv">
-        <svg class="svc-ico" viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12"/><path d="M16 10l6-4v12l-6-4z"/></svg>
-        <span class="svc-n">01</span>
-        <h3>Social Content Systems</h3>
-        <p>Monthly reels, photos and graphics — filmed, edited, captioned and published across Instagram, TikTok, Facebook and YouTube.</p>
-      </article>
-      <article class="svc rv">
-        <svg class="svc-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>
-        <span class="svc-n">02</span>
-        <h3>Commercials &amp; Campaigns</h3>
-        <p>Higher-ticket brand films and ad campaigns for businesses and organizations. Concept, script, shoot, post, delivery.</p>
-      </article>
-      <article class="svc rv">
-        <svg class="svc-ico" viewBox="0 0 24 24"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-7h6v7"/></svg>
-        <span class="svc-n">03</span>
-        <h3>Real Estate Videography</h3>
-        <p>Cinematic listing tours, agent branding content and neighborhood films that make a property move — and make the agent famous.</p>
-      </article>
-      <article class="svc rv">
-        <svg class="svc-ico" viewBox="0 0 24 24"><path d="M4 20V10l8-6 8 6v10"/><path d="M12 4V2M9 20v-6h6v6"/></svg>
-        <span class="svc-n">04</span>
-        <h3>Mosque &amp; Nonprofit Media</h3>
-        <p>Event coverage, khutbah and lecture clips, Ramadan campaigns, donor films and weekly content calendars for community organizations.</p>
-      </article>
-      <article class="svc rv">
-        <svg class="svc-ico" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 9v11"/></svg>
-        <span class="svc-n">05</span>
-        <h3>Content Management</h3>
-        <p>We run the calendar. Idea banks, hooks, captions, scheduling, posting and a monthly audience analytics report you can actually read.</p>
-      </article>
-      <article class="svc rv">
-        <svg class="svc-ico" viewBox="0 0 24 24"><path d="M12 3l2.6 6.2 6.7.5-5.1 4.4 1.6 6.6-5.8-3.6-5.8 3.6 1.6-6.6L2.7 9.7l6.7-.5z"/></svg>
-        <span class="svc-n">06</span>
-        <h3>Creator &amp; Influencer Editing</h3>
-        <p>High-volume editing for creators who film plenty and post rarely. Send the footage — get back a month of content.</p>
-      </article>
+    <div class="spec rv">
+      <div class="grp">
+        <div class="grp-label">Video Production <small>01 &ndash; 03</small></div>
+        <div class="stops">
+          <div class="stop"><span class="stop-n">01</span><h3>Capture</h3><p>We film. You get the footage, ready for your own editor.</p></div>
+          <div class="stop"><span class="stop-n">02</span><h3>Edit</h3><p>You film. We cut, color, caption and deliver.</p></div>
+          <div class="stop"><span class="stop-n">03</span><h3>Capture + Edit</h3><p>Shot and finished by one team, from first frame to final cut.</p></div>
+        </div>
+      </div>
+      <div class="grp">
+        <div class="grp-label">Social Media &amp; Marketing <small>04 &ndash; 05</small></div>
+        <div class="stops">
+          <div class="stop"><span class="stop-n">04</span><h3>Manage</h3><p>Your whole profile, every platform. Strategy, calendar, captions and posting.</p></div>
+          <div class="stop"><span class="stop-n">05</span><h3>Market</h3><p>Targeted social ads aimed at the right audience, with monthly metrics you can read.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="spec-note rv"><b>Social packages can include marketing.</b> Add targeted ad campaigns and a monthly report (reach, clicks, leads, cost per result) to any content package, or keep it content only.</p>
+
+    <div class="kind-head rv"><span class="eyebrow">What We Make</span></div>
+    <div class="kind-grid rv">
+      <div>Commercials</div><div>Real Estate</div><div>Event Coverage</div><div>Short Films</div>
+      <div>Documentaries</div><div>Music Videos</div><div>Religious Institutions &amp; Non-Profits</div><div>Creators &amp; Influencers</div>
     </div>
   </div>
 </section>
@@ -588,30 +622,9 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
         <span class="eyebrow">Selected Work</span>
         <h2>Proof, not promises.</h2>
       </div>
-      <p class="lede">A sample of what leaves our edit bay every month — brand features,
-      creator reels and community films. Tap any frame to watch.</p>
+      <p class="lede">Brand features, creator reels and community films. Tap a frame to watch.</p>
     </div>
     <div class="work-grid" id="workGrid"></div>
-  </div>
-</section>
-
-<!-- ===================== PROCESS ===================== -->
-<section class="sec" id="process">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <div>
-        <span class="eyebrow">How It Works</span>
-        <h2>Four steps.<br>Then it just runs.</h2>
-      </div>
-      <p class="lede">Onboarding takes about a week. After that, your content calendar fills itself
-      and you approve from your phone.</p>
-    </div>
-    <div class="steps">
-      <div class="step rv"><h3>Request a Quote</h3><p>Answer a few quick questions about what you need. It takes about 90 seconds.</p></div>
-      <div class="step rv"><h3>Get Your Proposal</h3><p>Within one business day, a clear scope and price built around your goals and budget.</p></div>
-      <div class="step rv"><h3>Film &amp; Edit</h3><p>We shoot on location or you upload footage. Our team edits, captions and color-grades every piece.</p></div>
-      <div class="step rv"><h3>Publish &amp; Report</h3><p>Scheduled across your platforms, then reviewed monthly with an audience analytics report.</p></div>
-    </div>
   </div>
 </section>
 
@@ -632,9 +645,9 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
         <div class="qf-head"><b id="qfTitle">Your project</b><span id="qfCount">Step 1 of 4</span></div>
         <div class="qf-bars" id="qfBars"><i class="cur"></i><i></i><i></i><i></i></div>
         <form id="quoteForm" novalidate>
-          <div class="qs on" data-title="Your project"><fieldset class="q"><legend>What do you need?<small>Pick all that apply.</small></legend><div class="chips"><label class="chip"><input type="checkbox" name="need" value="Monthly social content"><span>Monthly social content</span></label><label class="chip"><input type="checkbox" name="need" value="Commercial / brand film"><span>Commercial / brand film</span></label><label class="chip"><input type="checkbox" name="need" value="Real estate video"><span>Real estate video</span></label><label class="chip"><input type="checkbox" name="need" value="Event coverage"><span>Event coverage</span></label><label class="chip"><input type="checkbox" name="need" value="Mosque / nonprofit media"><span>Mosque / nonprofit media</span></label><label class="chip"><input type="checkbox" name="need" value="Editing only (I have footage)"><span>Editing only (I have footage)</span></label><label class="chip"><input type="checkbox" name="need" value="Not sure yet"><span>Not sure yet</span></label></div></fieldset><fieldset class="q"><legend>Which best describes you?</legend><div class="chips"><label class="chip"><input type="radio" name="who" value="Local business"><span>Local business</span></label><label class="chip"><input type="radio" name="who" value="Real estate"><span>Real estate</span></label><label class="chip"><input type="radio" name="who" value="Mosque / nonprofit"><span>Mosque / nonprofit</span></label><label class="chip"><input type="radio" name="who" value="Influencer / creator"><span>Influencer / creator</span></label><label class="chip"><input type="radio" name="who" value="Brand / corporate"><span>Brand / corporate</span></label><label class="chip"><input type="radio" name="who" value="Other"><span>Other</span></label></div></fieldset><fieldset class="q"><legend>Ongoing or one-time?</legend><div class="chips"><label class="chip"><input type="radio" name="term" value="Ongoing / monthly"><span>Ongoing / monthly</span></label><label class="chip"><input type="radio" name="term" value="One-time project"><span>One-time project</span></label><label class="chip"><input type="radio" name="term" value="Not sure yet"><span>Not sure yet</span></label></div></fieldset></div>
-          <div class="qs" data-title="Scope"><fieldset class="q"><legend>How many videos?<small><span id="countHint">Per month if ongoing, total if one-time.</span></small></legend><div class="chips"><label class="chip"><input type="radio" name="count" value="1–4"><span>1–4</span></label><label class="chip"><input type="radio" name="count" value="5–12"><span>5–12</span></label><label class="chip"><input type="radio" name="count" value="13–20"><span>13–20</span></label><label class="chip"><input type="radio" name="count" value="20+"><span>20+</span></label><label class="chip"><input type="radio" name="count" value="Not sure yet"><span>Not sure yet</span></label></div></fieldset><fieldset class="q"><legend>Who is filming?</legend><div class="chips"><label class="chip"><input type="radio" name="filming" value="You film, we edit"><span>You film, we edit</span></label><label class="chip"><input type="radio" name="filming" value="We film and edit"><span>We film and edit</span></label><label class="chip"><input type="radio" name="filming" value="A mix of both"><span>A mix of both</span></label></div></fieldset><fieldset class="q" id="qWhere" hidden><legend>Where would we film?<small>We travel worldwide.</small></legend><div class="chips"><label class="chip"><input type="radio" name="where" value="Dallas–Fort Worth"><span>Dallas–Fort Worth</span></label><label class="chip"><input type="radio" name="where" value="New York"><span>New York</span></label><label class="chip"><input type="radio" name="where" value="Los Angeles"><span>Los Angeles</span></label><label class="chip"><input type="radio" name="where" value="Somewhere else"><span>Somewhere else</span></label></div><div class="field other" id="otherWrap" hidden><input type="text" name="city_other" id="q-city" placeholder=" "><label for="q-city">City / country</label></div></fieldset><fieldset class="q"><legend>Where will it be posted?<small>Pick all that apply.</small></legend><div class="chips"><label class="chip"><input type="checkbox" name="platforms" value="Instagram"><span>Instagram</span></label><label class="chip"><input type="checkbox" name="platforms" value="TikTok"><span>TikTok</span></label><label class="chip"><input type="checkbox" name="platforms" value="YouTube"><span>YouTube</span></label><label class="chip"><input type="checkbox" name="platforms" value="Facebook"><span>Facebook</span></label><label class="chip"><input type="checkbox" name="platforms" value="LinkedIn"><span>LinkedIn</span></label><label class="chip"><input type="checkbox" name="platforms" value="Website / ads"><span>Website / ads</span></label></div></fieldset></div>
-          <div class="qs" data-title="Timing &amp; budget"><fieldset class="q"><legend>Want any extras?<small>Optional.</small></legend><div class="chips"><label class="chip"><input type="checkbox" name="extras" value="Posting &amp; management"><span>Posting &amp; management</span></label><label class="chip"><input type="checkbox" name="extras" value="Photos &amp; graphics"><span>Photos &amp; graphics</span></label><label class="chip"><input type="checkbox" name="extras" value="Strategy calls"><span>Strategy calls</span></label><label class="chip"><input type="checkbox" name="extras" value="Captions &amp; subtitles"><span>Captions &amp; subtitles</span></label><label class="chip"><input type="checkbox" name="extras" value="Drone"><span>Drone</span></label><label class="chip"><input type="checkbox" name="extras" value="Paid ad creative"><span>Paid ad creative</span></label><label class="chip"><input type="checkbox" name="extras" value="Rush turnaround"><span>Rush turnaround</span></label></div></fieldset><fieldset class="q"><legend>When do you want to start?</legend><div class="chips"><label class="chip"><input type="radio" name="start" value="As soon as possible"><span>As soon as possible</span></label><label class="chip"><input type="radio" name="start" value="Within 2 weeks"><span>Within 2 weeks</span></label><label class="chip"><input type="radio" name="start" value="This month"><span>This month</span></label><label class="chip"><input type="radio" name="start" value="Next month or later"><span>Next month or later</span></label><label class="chip"><input type="radio" name="start" value="Just exploring"><span>Just exploring</span></label></div></fieldset><fieldset class="q"><legend>What budget are you working with?<small>Monthly if ongoing. This helps us right-size your package. It is not a limit.</small></legend><div class="chips"><label class="chip"><input type="radio" name="budget" value="Under $1,000"><span>Under $1,000</span></label><label class="chip"><input type="radio" name="budget" value="$1,000–$2,500"><span>$1,000–$2,500</span></label><label class="chip"><input type="radio" name="budget" value="$2,500–$5,000"><span>$2,500–$5,000</span></label><label class="chip"><input type="radio" name="budget" value="$5,000+"><span>$5,000+</span></label><label class="chip"><input type="radio" name="budget" value="Not sure yet"><span>Not sure yet</span></label></div></fieldset></div>
+          <div class="qs on" data-title="Your project"><fieldset class="q"><legend>What do you need?<small>Pick all that apply.</small></legend><div class="chips"><label class="chip"><input type="checkbox" name="need" value="Filming only"><span>Filming only</span></label><label class="chip"><input type="checkbox" name="need" value="Editing only (I have footage)"><span>Editing only (I have footage)</span></label><label class="chip"><input type="checkbox" name="need" value="Filming + editing"><span>Filming + editing</span></label><label class="chip"><input type="checkbox" name="need" value="Social media management"><span>Social media management</span></label><label class="chip"><input type="checkbox" name="need" value="Targeted ads &amp; marketing"><span>Targeted ads &amp; marketing</span></label><label class="chip"><input type="checkbox" name="need" value="Not sure yet"><span>Not sure yet</span></label></div></fieldset><fieldset class="q"><legend>What kind of project?<small>Pick all that apply.</small></legend><div class="chips"><label class="chip"><input type="checkbox" name="ptype" value="Commercial"><span>Commercial</span></label><label class="chip"><input type="checkbox" name="ptype" value="Real estate"><span>Real estate</span></label><label class="chip"><input type="checkbox" name="ptype" value="Event coverage"><span>Event coverage</span></label><label class="chip"><input type="checkbox" name="ptype" value="Short film"><span>Short film</span></label><label class="chip"><input type="checkbox" name="ptype" value="Documentary"><span>Documentary</span></label><label class="chip"><input type="checkbox" name="ptype" value="Music video"><span>Music video</span></label><label class="chip"><input type="checkbox" name="ptype" value="Social media content"><span>Social media content</span></label><label class="chip"><input type="checkbox" name="ptype" value="Other"><span>Other</span></label></div></fieldset></div>
+          <div class="qs" data-title="Scope"><fieldset class="q"><legend>Ongoing or one-time?</legend><div class="chips"><label class="chip"><input type="radio" name="term" value="Ongoing / monthly"><span>Ongoing / monthly</span></label><label class="chip"><input type="radio" name="term" value="One-time project"><span>One-time project</span></label><label class="chip"><input type="radio" name="term" value="Not sure yet"><span>Not sure yet</span></label></div></fieldset><fieldset class="q"><legend>How many videos?<small><span id="countHint">Per month if ongoing, total if one-time.</span></small></legend><div class="chips"><label class="chip"><input type="radio" name="count" value="1–4"><span>1–4</span></label><label class="chip"><input type="radio" name="count" value="5–12"><span>5–12</span></label><label class="chip"><input type="radio" name="count" value="13–20"><span>13–20</span></label><label class="chip"><input type="radio" name="count" value="20+"><span>20+</span></label><label class="chip"><input type="radio" name="count" value="None (ads / management only)"><span>None (ads / management only)</span></label><label class="chip"><input type="radio" name="count" value="Not sure yet"><span>Not sure yet</span></label></div></fieldset><fieldset class="q" id="qWhere" hidden><legend>Where would we film?<small>We travel worldwide.</small></legend><div class="chips"><label class="chip"><input type="radio" name="where" value="Dallas–Fort Worth"><span>Dallas–Fort Worth</span></label><label class="chip"><input type="radio" name="where" value="New York"><span>New York</span></label><label class="chip"><input type="radio" name="where" value="Los Angeles"><span>Los Angeles</span></label><label class="chip"><input type="radio" name="where" value="Somewhere else"><span>Somewhere else</span></label></div><div class="field other" id="otherWrap" hidden><input type="text" name="city_other" id="q-city" placeholder=" "><label for="q-city">City / country</label></div></fieldset><fieldset class="q" id="qMarketing" hidden><legend>Add a marketing layer?<small>Targeted ads plus a monthly metrics report (reach, clicks, leads).</small></legend><div class="chips"><label class="chip"><input type="radio" name="marketing" value="Yes, include targeted ads + metrics"><span>Yes, include targeted ads + metrics</span></label><label class="chip"><input type="radio" name="marketing" value="Maybe, tell me more"><span>Maybe, tell me more</span></label><label class="chip"><input type="radio" name="marketing" value="No, content only"><span>No, content only</span></label></div></fieldset><fieldset class="q"><legend>Where will it be posted?<small>Pick all that apply.</small></legend><div class="chips"><label class="chip"><input type="checkbox" name="platforms" value="Instagram"><span>Instagram</span></label><label class="chip"><input type="checkbox" name="platforms" value="TikTok"><span>TikTok</span></label><label class="chip"><input type="checkbox" name="platforms" value="YouTube"><span>YouTube</span></label><label class="chip"><input type="checkbox" name="platforms" value="Facebook"><span>Facebook</span></label><label class="chip"><input type="checkbox" name="platforms" value="LinkedIn"><span>LinkedIn</span></label><label class="chip"><input type="checkbox" name="platforms" value="Website / ads"><span>Website / ads</span></label></div></fieldset></div>
+          <div class="qs" data-title="Timing &amp; budget"><fieldset class="q"><legend>Which best describes you?</legend><div class="chips"><label class="chip"><input type="radio" name="who" value="Local business"><span>Local business</span></label><label class="chip"><input type="radio" name="who" value="Real estate"><span>Real estate</span></label><label class="chip"><input type="radio" name="who" value="Religious institution / non-profit"><span>Religious institution / non-profit</span></label><label class="chip"><input type="radio" name="who" value="Influencer / creator"><span>Influencer / creator</span></label><label class="chip"><input type="radio" name="who" value="Brand / corporate"><span>Brand / corporate</span></label><label class="chip"><input type="radio" name="who" value="Other"><span>Other</span></label></div></fieldset><fieldset class="q"><legend>Want any extras?<small>Optional.</small></legend><div class="chips"><label class="chip"><input type="checkbox" name="extras" value="Photos &amp; graphics"><span>Photos &amp; graphics</span></label><label class="chip"><input type="checkbox" name="extras" value="Strategy calls"><span>Strategy calls</span></label><label class="chip"><input type="checkbox" name="extras" value="Captions &amp; subtitles"><span>Captions &amp; subtitles</span></label><label class="chip"><input type="checkbox" name="extras" value="Drone"><span>Drone</span></label><label class="chip"><input type="checkbox" name="extras" value="Rush turnaround"><span>Rush turnaround</span></label></div></fieldset><fieldset class="q"><legend>When do you want to start?</legend><div class="chips"><label class="chip"><input type="radio" name="start" value="As soon as possible"><span>As soon as possible</span></label><label class="chip"><input type="radio" name="start" value="Within 2 weeks"><span>Within 2 weeks</span></label><label class="chip"><input type="radio" name="start" value="This month"><span>This month</span></label><label class="chip"><input type="radio" name="start" value="Next month or later"><span>Next month or later</span></label><label class="chip"><input type="radio" name="start" value="Just exploring"><span>Just exploring</span></label></div></fieldset><fieldset class="q"><legend>What budget are you working with?<small>Monthly if ongoing. This helps us right-size your package. It is not a limit.</small></legend><div class="chips"><label class="chip"><input type="radio" name="budget" value="Under $1,000"><span>Under $1,000</span></label><label class="chip"><input type="radio" name="budget" value="$1,000–$2,500"><span>$1,000–$2,500</span></label><label class="chip"><input type="radio" name="budget" value="$2,500–$5,000"><span>$2,500–$5,000</span></label><label class="chip"><input type="radio" name="budget" value="$5,000+"><span>$5,000+</span></label><label class="chip"><input type="radio" name="budget" value="Not sure yet"><span>Not sure yet</span></label></div></fieldset></div>
           <div class="qs" data-title="Contact"><div class="f-row"><div class="field"><input type="text" name="fullname" id="q-name" placeholder=" " autocomplete="name"><label for="q-name">Your name</label></div><div class="field"><input type="email" name="email" id="q-email" placeholder=" " autocomplete="email"><label for="q-email">Email</label></div></div><div class="f-row"><div class="field"><input type="tel" name="phone" id="q-phone" placeholder=" " autocomplete="tel"><label for="q-phone">Phone (optional)</label></div><div class="field"><input type="text" name="brand" id="q-brand" placeholder=" "><label for="q-brand">Business, website or @handle</label></div></div><div class="field"><textarea name="message" id="q-msg" placeholder=" "></textarea><label for="q-msg">Questions or anything else? (optional)</label></div><input type="text" name="_gotcha" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true"></div>
           <p class="qf-err" id="qfErr" role="alert"></p>
           <div class="qf-nav">
@@ -666,18 +679,20 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
       <p class="lede">Anything not covered here, ask in the form or by email &mdash; we&rsquo;d rather over-explain than over-promise.</p>
     </div>
     <div class="faq rv">
-      <details open><summary>How is pricing decided?</summary>
-        <div class="ans">Every project is quoted to fit. We look at how much content you need, who is filming, where, how fast you need it, and what&rsquo;s included, like posting, strategy and ad creative. Fill out the quote form and you&rsquo;ll have a clear number within one business day.</div></details>
+      <details open><summary>Can I hire you for just video, or just editing?</summary>
+        <div class="ans">Yes. Filming only, editing only, filming and editing together, full social media management, or targeted ads are all separate options. Pick one or combine them, and add more later.</div></details>
+      <details><summary>What does the marketing layer include?</summary>
+        <div class="ans">Targeted ad campaigns on social platforms, built around your audience, with a monthly metrics report covering reach, clicks, leads and cost per result. It can be added to any social media package or run on its own. Ad spend is paid to the platform and is separate from our fee.</div></details>
+      <details><summary>How is pricing decided?</summary>
+        <div class="ans">Every project is quoted to fit. We look at how much you need, who is filming, where, how fast you need it, and what&rsquo;s included. Fill out the quote form and you&rsquo;ll have a clear number within one business day.</div></details>
+      <details><summary>What kinds of projects do you take on?</summary>
+        <div class="ans">Commercials, real estate, event coverage, short films, documentaries, music videos, content for religious institutions and non-profits, and ongoing social content for businesses and creators.</div></details>
       <details><summary>Am I locked into a contract?</summary>
         <div class="ans">No. Monthly work is month-to-month, with 14 days&rsquo; notice to pause or cancel. One-off projects are scoped and agreed up front.</div></details>
-      <details><summary>How fast is turnaround?</summary>
-        <div class="ans">Typically 1&ndash;4 business days per piece, depending on volume. A priority queue (24&ndash;48 hours) and rush delivery are available &mdash; just tell us your timeline in the form.</div></details>
-      <details><summary>Where do you shoot &mdash; and can you come to me?</summary>
-        <div class="ans">We have crews based in Dallas&ndash;Fort Worth, New York and Los Angeles, so filming in any of those three metros has no travel charge. Outside of them, we produce worldwide &mdash; either by flying our team out or by directing a vetted local crew on the ground, with our editors handling post either way. Travel is quoted per project. And because editing is fully remote, we already work with clients in cities we have never set foot in.</div></details>
+      <details><summary>Where do you shoot, and can you come to me?</summary>
+        <div class="ans">We have crews in Dallas&ndash;Fort Worth, New York and Los Angeles, with no travel charge in those three metros. Anywhere else, we fly out or direct a vetted local crew, and our editors handle post either way. Travel is quoted per project.</div></details>
       <details><summary>Who owns the footage and the final videos?</summary>
         <div class="ans">You do. You get full commercial rights to everything we produce for you, plus the raw files on request. We only ask permission to feature work in our portfolio.</div></details>
-      <details><summary>Can you do commercials, real estate or events?</summary>
-        <div class="ans">Yes. Commercials, real estate shoots, event coverage, podcasts, and mosque and nonprofit campaigns are all quoted individually. Choose what you need in the form and we&rsquo;ll scope it.</div></details>
       <details><summary>How do payments work?</summary>
         <div class="ans">Monthly clients are billed on the same date each month. One-off projects are 50% to book and 50% on delivery, invoiced directly.</div></details>
     </div>
@@ -708,11 +723,11 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
     <div class="f-top">
       <div>
         <img class="f-logo" src="assets/logo-transparent.png" alt="Crystal City Productions">
-        <p class="lede" style="font-size:15px; max-width:36ch">High-quality content systems for businesses, mosques, influencers and real estate brands. Based in Dallas&ndash;Fort Worth, New York and Los Angeles &mdash; producing worldwide.</p>
+        <p class="lede" style="font-size:15px; max-width:36ch">Video production, editing, social media management and targeted ads for businesses, real estate brands, religious institutions, non-profits and creators.</p>
       </div>
       <div class="f-nav">
         <div class="f-col"><b>Company</b>
-          <a href="#services">Services</a><a href="#work">Work</a><a href="#process">Process</a><a href="#faq">FAQ</a></div>
+          <a href="#services">Services</a><a href="#work">Work</a><a href="#faq">FAQ</a></div>
         <div class="f-col"><b>Get Started</b>
           <a href="#quote">Request a Quote</a><a href="#faq">How Pricing Works</a><a href="#contact">Talk to Us</a></div>
         <div class="f-col"><b>Connect</b>
@@ -731,9 +746,9 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
 <script>
 /* ============================================================
    1) QUOTE FORM — where submissions go
-   Paste a Formspree (or similar) endpoint URL between the quotes,
-   e.g. "https://formspree.io/f/abcdwxyz". Until you do, the form
-   opens an email to QUOTE_EMAIL with every answer filled in.
+   Submissions are sent to the address below through FormSubmit
+   (formsubmit.co), which forwards each request to your inbox.
+   Set QUOTE_ENDPOINT to "" to fall back to opening an email.
    ============================================================ */
 const QUOTE_ENDPOINT = "https://formsubmit.co/ajax/crystalcityprod@gmail.com";
 const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
@@ -774,17 +789,24 @@ const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
     }
   });
 
-  /* "Not sure yet" is exclusive in the multi-select */
+  /* "Not sure yet" is exclusive in the multi-select; conditional questions follow the choices */
+  const needs = () => [...form.querySelectorAll('input[name="need"]:checked')].map(i => i.value);
+  function syncConditional(){
+    const n = needs();
+    const films = n.includes('Filming only') || n.includes('Filming + editing');
+    const mgmt = n.includes('Social media management');
+    const w = document.getElementById('qWhere'), m = document.getElementById('qMarketing');
+    w.hidden = !films;
+    if(!films){ form.querySelectorAll('input[name="where"]').forEach(i => i.checked = false); document.getElementById('otherWrap').hidden = true; }
+    m.hidden = !mgmt;
+    if(!mgmt) form.querySelectorAll('input[name="marketing"]').forEach(i => i.checked = false);
+  }
   form.addEventListener('change', e => {
     const t = e.target;
     if(t.name === 'need'){
       if(t.value === 'Not sure yet' && t.checked) form.querySelectorAll('input[name="need"]').forEach(i => { if(i !== t) i.checked = false; });
       else if(t.checked) form.querySelectorAll('input[name="need"]').forEach(i => { if(i.value === 'Not sure yet') i.checked = false; });
-    }
-    if(t.name === 'filming'){
-      const wants = t.value !== 'You film, we edit';
-      document.getElementById('qWhere').hidden = !wants;
-      if(!wants){ form.querySelectorAll('input[name="where"]').forEach(i => i.checked = false); document.getElementById('otherWrap').hidden = true; }
+      syncConditional();
     }
     if(t.name === 'where') document.getElementById('otherWrap').hidden = t.value !== 'Somewhere else';
     if(t.name === 'term') document.getElementById('countHint').textContent =
@@ -797,9 +819,10 @@ const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
     return {
       'Name': fd.get('fullname').trim(), 'Email': fd.get('email').trim(), 'Phone': (fd.get('phone') || '').trim() || '-',
       'Business / handle': (fd.get('brand') || '').trim() || '-',
-      'Needs': get('need'), 'Client type': get('who'), 'Ongoing or one-time': get('term'), 'Videos': get('count'),
-      'Who films': get('filming'),
+      'Services needed': get('need'), 'Project types': get('ptype'), 'Client type': get('who'),
+      'Ongoing or one-time': get('term'), 'Videos': get('count'),
       'Filming location': !where ? '-' : where === 'Somewhere else' ? ((fd.get('city_other') || '').trim() || 'Somewhere else') : where,
+      'Marketing layer': get('marketing'),
       'Platforms': get('platforms'), 'Extras': get('extras'), 'Start': get('start'), 'Budget': get('budget'),
       'Notes': (fd.get('message') || '').trim() || '-'
     };
@@ -862,9 +885,9 @@ document.getElementById('workGrid').innerHTML = WORK.map(v => `
       <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
       <iframe src="https://drive.google.com/file/d/${v.id}/preview"
               title="${v.title}" loading="lazy"
-              allow="fullscreen; picture-in-picture" allowfullscreen></iframe>
+              scrolling="no" allow="fullscreen; picture-in-picture" allowfullscreen></iframe>
     </div>
-    <figcaption class="w-cap"><b>${v.title}</b><small>${v.tag}</small></figcaption>
+    <figcaption class="w-cap"><b>${v.title}</b><small>${v.tag}</small><a class="w-open" href="https://drive.google.com/file/d/${v.id}/view" target="_blank" rel="noopener">Full screen &#8599;</a></figcaption>
   </figure>`).join('');
 
 /* ============================================================
@@ -877,10 +900,6 @@ function observe(){
   }, {threshold:.12, rootMargin:'0px 0px -8% 0px'});
   document.querySelectorAll('.rv:not(.in)').forEach(el => io.observe(el));
 }
-
-/* marquee */
-const words = ["Social Content Systems","Commercials","Real Estate Videography","Community &amp; Nonprofit Media","Brand Films","Event Coverage","Creator Editing","Content Management"];
-document.getElementById('mq').innerHTML = (words.map(w => `<span>${w}</span>`).join('')).repeat(2);
 
 /* nav state */
 const nav = document.getElementById('nav');

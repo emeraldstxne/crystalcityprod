@@ -256,6 +256,18 @@ body.menu-open .mobile-menu{clip-path:inset(0 0 0 0); pointer-events:auto}
 .w-item.wide{grid-column:span 8}
 .w-item.tall{grid-column:span 4}
 .w-item.full{grid-column:span 12}
+.w-item.half{grid-column:span 6}
+.w-group{grid-column:1/-1; margin-top:clamp(18px,3vw,40px)}
+.w-group:first-child{margin-top:0}
+
+/* client results */
+.results{display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--ink-line); border-left:1px solid var(--ink-line)}
+.results a{display:flex; flex-direction:column; padding:clamp(22px,2.4vw,34px) clamp(18px,2vw,28px); border-right:1px solid var(--ink-line); border-bottom:1px solid var(--ink-line); color:inherit; text-decoration:none; transition:background .45s var(--ease)}
+.results a:hover{background:linear-gradient(160deg,rgba(233,188,83,.08),transparent)}
+.r-num{font-family:var(--display); font-weight:300; font-size:clamp(40px,4.6vw,66px); line-height:1; color:var(--gold)}
+.r-lbl{margin-top:8px; font-size:10px; letter-spacing:.26em; text-transform:uppercase; color:var(--mute-2)}
+.r-handle{margin-top:clamp(22px,3vw,40px); font-family:var(--display); font-size:clamp(16px,1.4vw,19px); font-weight:300}
+.r-type{margin-top:6px; font-size:14px; color:var(--mute)}
 
 .w-frame{
   position:relative; width:100%; aspect-ratio:var(--r,16/9); background:#000;
@@ -277,7 +289,8 @@ body.menu-open .mobile-menu{clip-path:inset(0 0 0 0); pointer-events:auto}
 
 @media (max-width:900px){
   .work-grid{grid-template-columns:1fr; align-items:stretch}
-  .w-item.wide,.w-item.tall,.w-item.full{grid-column:span 1}
+  .w-item.wide,.w-item.tall,.w-item.full,.w-item.half{grid-column:span 1}
+  .results{grid-template-columns:repeat(2,1fr)}
   .w-item.tall .w-frame{max-width:420px; margin-inline:auto; width:100%}
   .w-item.tall .w-cap{max-width:420px; margin-inline:auto; width:100%}
 }
@@ -510,9 +523,9 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
 
   /* video: full-width, taller frame so the Drive player has room to sit centered */
   .work-grid{gap:34px}
-  .w-item.wide,.w-item.full{margin-inline:calc(var(--gutter) * -1)}
-  .w-item.wide .w-frame,.w-item.full .w-frame{aspect-ratio:4/3; border-inline:0}
-  .w-item.wide .w-cap,.w-item.full .w-cap{margin-inline:var(--gutter)}
+  .w-item.wide,.w-item.full,.w-item.half{margin-inline:calc(var(--gutter) * -1)}
+  .w-item.wide .w-frame,.w-item.full .w-frame,.w-item.half .w-frame{aspect-ratio:4/3; border-inline:0}
+  .w-item.wide .w-cap,.w-item.full .w-cap,.w-item.half .w-cap{margin-inline:var(--gutter)}
   .w-frame .cnr{display:none}
   .w-item.tall .w-frame{max-width:340px}
   .w-item.tall .w-cap{max-width:340px}
@@ -642,6 +655,25 @@ footer{padding:clamp(56px,7vw,88px) 0 34px; border-top:1px solid var(--ink-line)
       <p class="lede">Brand features, creator reels and community films. Tap a frame to watch.</p>
     </div>
     <div class="work-grid" id="workGrid"></div>
+  </div>
+</section>
+
+<!-- ===================== RESULTS ===================== -->
+<section class="sec" id="results" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div>
+        <span class="eyebrow">Client Results</span>
+        <h2>Pages we&rsquo;ve grown.</h2>
+      </div>
+      <p class="lede">Accounts we create content for, from local masjids to million-follower brands.</p>
+    </div>
+    <div class="results rv">
+      <a href="https://www.instagram.com/thelovechange/" target="_blank" rel="noopener"><span class="r-num">1.1M</span><span class="r-lbl">Followers</span><span class="r-handle">@thelovechange</span><span class="r-type">Faceless profile</span></a>
+      <a href="https://www.instagram.com/imamofthepeople/" target="_blank" rel="noopener"><span class="r-num">76.3K</span><span class="r-lbl">Followers</span><span class="r-handle">@imamofthepeople</span><span class="r-type">Influencer / public figure</span></a>
+      <a href="https://www.tiktok.com/@timeismoneytv" target="_blank" rel="noopener"><span class="r-num">32.9K</span><span class="r-lbl">Followers &middot; 203K likes</span><span class="r-handle">@timeismoneytv</span><span class="r-type">Service-based business</span></a>
+      <a href="https://www.instagram.com/frisco_masjid/" target="_blank" rel="noopener"><span class="r-num">11.8K</span><span class="r-lbl">Followers</span><span class="r-handle">@Frisco_Masjid</span><span class="r-type">Religious institution</span></a>
+    </div>
   </div>
 </section>
 
@@ -890,22 +922,37 @@ const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
    `ratio` controls the player shape: "9/16" vertical (reels)
    or "16/9" horizontal (commercials, event films).
    ============================================================ */
+/* src: "drive" (id = Drive file id), "youtube" (id = video id after watch?v=),
+   "instagram" (id = reel code after /reel/). size: "full", "wide", "half" or "tall". */
 const WORK = [
-  { id:"1cIVguI1oONkX9yk-FSC-76RHHkSX3v2q", tag:"Brand Feature",  title:"Phreeart",             ratio:"16/9", size:"wide" },
-  { id:"13Q0YNS_5Ri5wg2nOdQiX6W8GLToPt9YV", tag:"Creator Reel",   title:"VK — Reel Series",     ratio:"9/16", size:"tall" },
-  { id:"1K0_SYcpa8WY8nrdGtXdT2uBwPInAmwF-", tag:"Community Film", title:"Interfaith Gathering", ratio:"21/9", size:"full" }
+  { group:"Films", items:[
+    { src:"drive",   id:"1cIVguI1oONkX9yk-FSC-76RHHkSX3v2q", tag:"Brand Feature",  title:"Phreeart",              ratio:"16/9", size:"full" },
+    { src:"drive",   id:"1K0_SYcpa8WY8nrdGtXdT2uBwPInAmwF-", tag:"Community Film", title:"Interfaith Gathering",  ratio:"16/9", size:"half" },
+    { src:"youtube", id:"xSbwEUqKtcQ",                       tag:"Community Film", title:"First Tarawih of 1447", ratio:"16/9", size:"half" }
+  ]},
+  { group:"Reels &middot; VK", items:[
+    { src:"drive",     id:"13Q0YNS_5Ri5wg2nOdQiX6W8GLToPt9YV", tag:"Creator Reel", title:"VK — Reel Series", ratio:"9/16", size:"tall" },
+    { src:"instagram", id:"DVtizkBEdeD",                      tag:"Instagram Reel", title:"VK — On Instagram", ratio:"10/17", size:"tall" }
+  ]}
 ];
+const embedUrl = v => v.src === 'youtube'   ? `https://www.youtube.com/embed/${v.id}?rel=0&playsinline=1` + (location.protocol.startsWith('http') ? `&origin=${encodeURIComponent(location.origin)}` : '')
+                    : v.src === 'instagram' ? `https://www.instagram.com/reel/${v.id}/embed/`
+                    : `https://drive.google.com/file/d/${v.id}/preview`;
+const openUrl  = v => v.src === 'youtube'   ? `https://www.youtube.com/watch?v=${v.id}`
+                    : v.src === 'instagram' ? `https://www.instagram.com/reel/${v.id}/`
+                    : `https://drive.google.com/file/d/${v.id}/view`;
 
-document.getElementById('workGrid').innerHTML = WORK.map(v => `
+document.getElementById('workGrid').innerHTML = WORK.map(g => `
+  <div class="w-group rv"><span class="eyebrow">${g.group}</span></div>` + g.items.map(v => `
   <figure class="w-item ${v.size} rv">
     <div class="w-frame" style="--r:${v.ratio}">
       <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
-      <iframe src="https://drive.google.com/file/d/${v.id}/preview"
-              title="${v.title}" loading="lazy"
-              scrolling="no" allow="fullscreen; picture-in-picture" allowfullscreen></iframe>
+      <iframe src="${embedUrl(v)}"
+              title="${v.title}" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
+              scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; fullscreen; picture-in-picture; web-share" allowfullscreen></iframe>
     </div>
-    <figcaption class="w-cap"><b>${v.title}</b><small>${v.tag}</small><a class="w-open" href="https://drive.google.com/file/d/${v.id}/view" target="_blank" rel="noopener">Full screen &#8599;</a></figcaption>
-  </figure>`).join('');
+    <figcaption class="w-cap"><b>${v.title}</b><small>${v.tag}</small><a class="w-open" href="${openUrl(v)}" target="_blank" rel="noopener">${v.src === 'instagram' ? 'Open on Instagram' : v.src === 'youtube' ? 'Watch on YouTube' : 'Full screen'} &#8599;</a></figcaption>
+  </figure>`).join('')).join('');
 
 /* ============================================================
    3) SCROLL REVEAL

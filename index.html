@@ -556,6 +556,21 @@ html body h3{font-weight:700!important; letter-spacing:-.02em!important}
 html body p{font-weight:400!important}
 html body input, html body textarea{text-transform:none!important}
 html body input::placeholder, html body textarea::placeholder{text-transform:uppercase}
+
+/* v8 results: profile screenshots with captions */
+.results{grid-template-columns:repeat(5,1fr)!important; gap:clamp(14px,1.8vw,28px); border:0!important}
+.results a{padding:0!important; border:0!important; align-items:center; text-align:center; background:none!important}
+.results img{display:block; width:100%; height:auto; border:1px solid var(--ink-line); transition:border-color .45s var(--ease), transform .45s var(--ease)}
+.results a:hover img{border-color:rgba(233,188,83,.55); transform:translateY(-4px)}
+.results .r-handle{margin-top:18px; font-weight:700!important; letter-spacing:.02em; font-size:clamp(12px,1.15vw,16px); overflow-wrap:anywhere}
+.results .r-type{margin-top:6px; font-size:clamp(10.5px,.95vw,13px); letter-spacing:.04em; color:var(--mute)}
+@media (max-width:900px){
+  .results{display:flex!important; overflow-x:auto; scroll-snap-type:x mandatory; gap:14px; margin-inline:calc(var(--gutter) * -1); padding-inline:var(--gutter); -webkit-overflow-scrolling:touch; scrollbar-width:none}
+  .results::-webkit-scrollbar{display:none}
+  .results a{flex:0 0 62%; max-width:300px; scroll-snap-align:center}
+  .results .r-handle{font-size:13px}
+}
+.w-frame video{position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:cover; background:#000}
 </style>
 </head>
 <body>
@@ -678,10 +693,11 @@ html body input::placeholder, html body textarea::placeholder{text-transform:upp
       <p class="lede">Accounts we create content for, from local masjids to million-follower brands.</p>
     </div>
     <div class="results rv">
-      <a href="https://www.instagram.com/thelovechange/" target="_blank" rel="noopener"><span class="r-num">1.1M</span><span class="r-lbl">Followers</span><span class="r-handle">@thelovechange</span><span class="r-type">Faceless profile</span></a>
-      <a href="https://www.instagram.com/imamofthepeople/" target="_blank" rel="noopener"><span class="r-num">76.3K</span><span class="r-lbl">Followers</span><span class="r-handle">@imamofthepeople</span><span class="r-type">Influencer / public figure</span></a>
-      <a href="https://www.tiktok.com/@timeismoneytv" target="_blank" rel="noopener"><span class="r-num">32.9K</span><span class="r-lbl">Followers &middot; 203K likes</span><span class="r-handle">@timeismoneytv</span><span class="r-type">Service-based business</span></a>
-      <a href="https://www.instagram.com/frisco_masjid/" target="_blank" rel="noopener"><span class="r-num">11.8K</span><span class="r-lbl">Followers</span><span class="r-handle">@Frisco_Masjid</span><span class="r-type">Religious institution</span></a>
+      <a href="https://www.instagram.com/emeraldstxne/" target="_blank" rel="noopener"><img src="assets/results/emeraldstxne.jpg" alt="Instagram profile of @emeraldstxne, 31.1K followers" width="720" height="1255" loading="lazy"><span class="r-handle">@emeraldstxne</span><span class="r-type">(Influencer / Film Director)</span></a>
+      <a href="https://www.instagram.com/imamofthepeople/" target="_blank" rel="noopener"><img src="assets/results/imamofthepeople.jpg" alt="Instagram profile of @imamofthepeople, 76.3K followers" width="720" height="1255" loading="lazy"><span class="r-handle">@imamofthepeople</span><span class="r-type">(Influencer / Public Figure)</span></a>
+      <a href="https://www.instagram.com/frisco_masjid/" target="_blank" rel="noopener"><img src="assets/results/frisco_masjid.jpg" alt="Instagram profile of @frisco_masjid, 11.8K followers" width="720" height="1255" loading="lazy"><span class="r-handle">@frisco_masjid</span><span class="r-type">(Religious Institution)</span></a>
+      <a href="https://www.instagram.com/thelovechange/" target="_blank" rel="noopener"><img src="assets/results/thelovechange.jpg" alt="Instagram profile of @thelovechange, 1.1M followers" width="720" height="1255" loading="lazy"><span class="r-handle">@thelovechange</span><span class="r-type">(Faceless Profile)</span></a>
+      <a href="https://www.tiktok.com/@timeismoneytv" target="_blank" rel="noopener"><img src="assets/results/timeismoneytv.jpg" alt="TikTok profile of @timeismoneytv, 32.6K followers" width="720" height="1255" loading="lazy"><span class="r-handle">@timeismoneytv</span><span class="r-type">(Service-Based Business)</span></a>
     </div>
   </div>
 </section>
@@ -939,15 +955,16 @@ const WORK = [
     { src:"drive",   id:"1K0_SYcpa8WY8nrdGtXdT2uBwPInAmwF-", tag:"Community Film", title:"Interfaith Gathering",  ratio:"16/9", size:"half" },
     { src:"youtube", id:"xSbwEUqKtcQ",                       tag:"Community Film", title:"First Tarawih of 1447", ratio:"16/9", size:"half" }
   ]},
-  { group:"Reels &middot; VK", items:[
+  { group:"Reels", items:[
     { src:"drive",     id:"13Q0YNS_5Ri5wg2nOdQiX6W8GLToPt9YV", tag:"Creator Reel", title:"VK — Reel Series", ratio:"9/16", size:"tall" },
-    { src:"instagram", id:"DVtizkBEdeD",                      tag:"Instagram Reel", title:"VK — On Instagram", ratio:"10/17", size:"tall" }
+    { src:"file", id:"assets/vk-reel.mp4", poster:"assets/vk-reel-poster.jpg", tag:"Short-Form Edit", title:"Lecture Reel", ratio:"9/16", size:"tall" }
   ]}
 ];
 const embedUrl = v => v.src === 'youtube'   ? `https://www.youtube.com/embed/${v.id}?rel=0&playsinline=1` + (location.protocol.startsWith('http') ? `&origin=${encodeURIComponent(location.origin)}` : '')
                     : v.src === 'instagram' ? `https://www.instagram.com/reel/${v.id}/embed/`
                     : `https://drive.google.com/file/d/${v.id}/preview`;
-const openUrl  = v => v.src === 'youtube'   ? `https://www.youtube.com/watch?v=${v.id}`
+const openUrl  = v => v.src === 'file' ? v.id
+                    : v.src === 'youtube'   ? `https://www.youtube.com/watch?v=${v.id}`
                     : v.src === 'instagram' ? `https://www.instagram.com/reel/${v.id}/`
                     : `https://drive.google.com/file/d/${v.id}/view`;
 
@@ -956,9 +973,9 @@ document.getElementById('workGrid').innerHTML = WORK.map(g => `
   <figure class="w-item ${v.size} rv">
     <div class="w-frame" style="--r:${v.ratio}">
       <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
-      <iframe src="${embedUrl(v)}"
+${v.src === 'file' ? `<video src="${v.id}" poster="${v.poster}" controls playsinline preload="none" title="${v.title}"></video>` : `<iframe src="${embedUrl(v)}"
               title="${v.title}" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
-              scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; fullscreen; picture-in-picture; web-share" allowfullscreen></iframe>
+              scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; fullscreen; picture-in-picture; web-share" allowfullscreen></iframe>`}
     </div>
     <figcaption class="w-cap"><b>${v.title}</b><small>${v.tag}</small><a class="w-open" href="${openUrl(v)}" target="_blank" rel="noopener">${v.src === 'instagram' ? 'Open on Instagram' : v.src === 'youtube' ? 'Watch on YouTube' : 'Full screen'} &#8599;</a></figcaption>
   </figure>`).join('')).join('');

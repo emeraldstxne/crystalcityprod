@@ -1288,10 +1288,9 @@ function buildReport(name,email,raw,R){
  out['7. Why this number']=why.map(w=>'- '+w).join('\n');
  out['8. Terms to offer']=termsList(primary.res,R).join('\n');
  out['9. Adjust it yourself']='Open the quote generator to change rates, pick a different package or tier, and copy a client-ready message: '+GEN_URL;
- out['10. Note']='Automated suggestion to save you a step — sanity-check before replying. Their full form answers are in the separate email you already get for this submission.';
+ out['10. Note']='The numbers above are an automated suggestion to save you a step — sanity-check before replying.';
  return out;
 }
-
  return { buildReport: function(name,email,raw){ const R=JSON.parse(JSON.stringify(DEFAULTS)); return buildReport(name,email,raw,R); } };
 })();
 
@@ -1380,15 +1379,19 @@ function buildReport(name,email,raw,R){
   }
   /* Suggested-quote email: run the same answers through the pricing engine and
      send a second, separate message with a suggested price and the reasoning
-     behind it. Fire-and-forget — if anything here fails, the client's own
-     confirmation and the raw-answers email are completely unaffected. */
-  function sendSuggestedQuote(data){
-    if(!QUOTE_ENDPOINT) return;
+     behind it, merged into the one notification email the client's
+     submission already triggers — never a second message. If the pricing
+     engine hiccups for any reason, the plain submission still goes through
+     untouched; a quote suggestion is a bonus, not a requirement. */
+  function withSuggestedQuote(data){
     try{
       const report = CCQuote.buildReport(data['Name'], data['Email'], collectRaw());
-      fetch(QUOTE_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'},
-        body: JSON.stringify(report)}).catch(()=>{});
-    }catch(e){ /* never let a pricing hiccup touch the visitor's experience */ }
+      const merged = Object.assign({}, data);
+      for(const k in report){ if(k === '_subject' || k === 'Lead') continue; merged[k] = report[k]; }
+      const price = (report['1. Suggested price (Standard)'] || '').split('  —')[0].trim();
+      merged['_subject'] = 'New quote request: ' + data['Name'] + (price ? '  —  suggested ' + price : '');
+      return merged;
+    }catch(e){ return Object.assign({_subject: 'New quote request: ' + data['Name']}, data); }
   }
   /* Calendly: after the quote is sent, offer a call right on the confirmation screen.
      Name, email and project notes are prefilled so they only pick a time. */
@@ -1439,10 +1442,9 @@ function buildReport(name,email,raw,R){
     if(QUOTE_ENDPOINT){
       try{
         const r = await fetch(QUOTE_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json', 'Accept':'application/json'},
-          body: JSON.stringify(Object.assign({_subject: 'New quote request: ' + data['Name']}, data))});
+          body: JSON.stringify(withSuggestedQuote(data))});
         if(!r.ok) throw new Error(r.status);
         finish('sent', data['Email'], data);
-        sendSuggestedQuote(data);
       }catch(x){
         err.textContent = 'That did not go through. Please try again, or email us at ' + QUOTE_EMAIL + '.';
         submit.disabled = false; label.textContent = 'Request My Quote';

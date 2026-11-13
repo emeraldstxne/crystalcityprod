@@ -359,6 +359,16 @@ body.menu-open .mobile-menu{clip-path:inset(0 0 0 0); pointer-events:auto}
 .qf-done .mark::after{content:""; position:absolute; left:50%; top:50%; width:16px; height:9px; margin:-7px 0 0 -8px; border-left:1.5px solid var(--gold); border-bottom:1.5px solid var(--gold); transform:rotate(-45deg)}
 .qf-done h3{font-size:clamp(28px,3.4vw,42px); font-weight:200}
 .qf-done a{color:var(--gold); border-bottom:1px solid var(--ink-line)}
+.qf-book{margin:clamp(30px,4vw,48px) auto 0; padding-top:clamp(28px,3.4vw,40px); border-top:1px solid var(--ink-line); max-width:760px; text-align:center}
+.qf-book .eyebrow{display:block; margin-bottom:14px}
+.qf-book h4{font-family:var(--display); font-weight:200; font-size:clamp(22px,2.6vw,30px); margin:0 0 10px; letter-spacing:-.005em}
+.qf-book p{font-size:14.5px; color:var(--mute); margin:0 auto 22px; max-width:460px}
+.qf-cal{min-width:280px; height:680px; border:1px solid var(--ink-line); background:#0A0A0C; position:relative}
+.qf-cal::before{content:"Loading calendar…"; position:absolute; inset:0; display:grid; place-items:center; font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--mute-2)}
+.qf-cal iframe{position:relative; z-index:1}
+.qf-book-alt{margin:16px 0 0; font-size:12px; letter-spacing:.04em; color:var(--mute-2)}
+.qf-book.booked .qf-cal,.qf-book.booked .qf-book-alt,.qf-book.booked p{display:none}
+@media(max-width:700px){.qf-cal{height:760px}}
 
 /* ============================================================
    PROCESS
@@ -763,6 +773,13 @@ html body .w-cap b{font-size:clamp(13px,1.35vw,19px)!important}
         <div class="mark"></div>
         <h3>Request received.</h3>
         <p id="qfDoneMsg" class="lede" style="margin:14px auto 0"></p>
+        <div class="qf-book" id="qfBook" hidden>
+          <span class="eyebrow center" id="qfBookEye">Want to move faster?</span>
+          <h4 id="qfBookTitle">Book a 30-minute call.</h4>
+          <p>Pick a time that works and we&rsquo;ll walk through your answers together, so your quote is dialed in before it lands in your inbox.</p>
+          <div class="qf-cal" id="qfCal"></div>
+          <p class="qf-book-alt">Calendar not loading? <a href="https://calendly.com/crystalcityprod/30min" target="_blank" rel="noopener">Open it in a new tab</a>.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -807,7 +824,7 @@ html body .w-cap b{font-size:clamp(13px,1.35vw,19px)!important}
         <span class="eyebrow">Prefer to talk first?</span>
         <h2>Let&rsquo;s talk.</h2>
       </div>
-      <p class="lede">Not ready for a quote? Email or DM us. We&rsquo;re happy to answer questions about timelines, formats, locations &mdash; anything. Or <a href="#quote" style="color:var(--gold); border-bottom:1px solid var(--ink-line)">start your quote</a> and we&rsquo;ll take it from there.</p>
+      <p class="lede">Not ready for a quote? Email or DM us. We&rsquo;re happy to answer questions about timelines, formats, locations &mdash; anything. Or <a href="#quote" style="color:var(--gold); border-bottom:1px solid var(--ink-line)">start your quote</a> and we&rsquo;ll take it from there. Prefer a live conversation? <a href="https://calendly.com/crystalcityprod/30min" target="_blank" rel="noopener" style="color:var(--gold); border-bottom:1px solid var(--ink-line)">Book a 30-minute call</a>.</p>
     </div>
     <dl class="c-grid rv">
       <div><dt>Email</dt><dd><a href="mailto:crystalcityprod@gmail.com">crystalcityprod@gmail.com</a></dd></div>
@@ -927,7 +944,35 @@ const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
       'Notes': (fd.get('message') || '').trim() || '-'
     };
   }
-  function finish(mode, email){
+  /* Calendly: after the quote is sent, offer a call right on the confirmation screen.
+     Name, email and project notes are prefilled so they only pick a time. */
+  const CAL_URL = 'https://calendly.com/crystalcityprod/30min';
+  let calLoaded = false;
+  function showBooking(data){
+    const wrap = document.getElementById('qfBook'), host = document.getElementById('qfCal');
+    if(!wrap || !data) return;
+    wrap.hidden = false;
+    if(calLoaded) return; calLoaded = true;
+    const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://assets.calendly.com/assets/external/widget.css'; document.head.appendChild(css);
+    const js = document.createElement('script'); js.src = 'https://assets.calendly.com/assets/external/widget.js'; js.async = true;
+    js.onload = () => {
+      const note = ['Needs: ' + data['Services needed'], 'Type: ' + data['Project types'], 'Start: ' + data['Start']].join(' | ');
+      Calendly.initInlineWidget({
+        url: CAL_URL + '?hide_gdpr_banner=1&background_color=0a0a0c&text_color=f3efe6&primary_color=e9bc53',
+        parentElement: host,
+        prefill: { name: data['Name'], email: data['Email'], customAnswers: { a1: note.slice(0, 950) } }
+      });
+    };
+    document.head.appendChild(js);
+    window.addEventListener('message', ev => {
+      if(ev.origin === 'https://calendly.com' && ev.data && ev.data.event === 'calendly.event_scheduled'){
+        wrap.classList.add('booked');
+        document.getElementById('qfBookEye').textContent = 'You\u2019re on the calendar';
+        document.getElementById('qfBookTitle').textContent = 'Call booked. Check your email for the invite.';
+      }
+    });
+  }
+  function finish(mode, email, data){
     qf.classList.add('sent');
     const msg = document.getElementById('qfDoneMsg');
     if(mode === 'mail'){
@@ -936,6 +981,7 @@ const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
       msg.innerHTML = 'Thank you. We&rsquo;ll send your custom quote to <b style="font-weight:400;color:var(--paper)"></b> within one business day.';
       msg.querySelector('b').textContent = email;
     }
+    showBooking(data);
     qf.scrollIntoView({behavior:'smooth', block:'start'});
   }
   form.addEventListener('submit', async e => {
@@ -949,7 +995,7 @@ const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
         const r = await fetch(QUOTE_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json', 'Accept':'application/json'},
           body: JSON.stringify(Object.assign({_subject: 'New quote request: ' + data['Name']}, data))});
         if(!r.ok) throw new Error(r.status);
-        finish('sent', data['Email']);
+        finish('sent', data['Email'], data);
       }catch(x){
         err.textContent = 'That did not go through. Please try again, or email us at ' + QUOTE_EMAIL + '.';
         submit.disabled = false; label.textContent = 'Request My Quote';
@@ -957,7 +1003,7 @@ const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
     } else {
       const body = Object.keys(data).map(k => k + ': ' + data[k]).join('\n');
       window.location.href = 'mailto:' + QUOTE_EMAIL + '?subject=' + encodeURIComponent('Quote request: ' + data['Name']) + '&body=' + encodeURIComponent(body);
-      finish('mail');
+      finish('mail', undefined, data);
     }
   });
 })();

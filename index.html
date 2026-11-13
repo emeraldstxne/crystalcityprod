@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script>
+/* Always open at the top (phones restore the last scroll spot, which lands mid-page). Section links like /#work still work. */
+if("scrollRestoration" in history) history.scrollRestoration="manual";
+function ccTop(){ if(!location.hash) window.scrollTo(0,0); }
+ccTop();
+addEventListener("load",ccTop);
+addEventListener("pageshow",ccTop);
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Crystal City Productions | Video Production Company — DFW, Miami, Chicago, NYC &amp; LA</title>
 <meta name="description" content="Crystal City Productions is a Dallas–Fort Worth video production company: commercials, real estate videography, social media content and targeted ads. Also serving Miami, Chicago, New York, Los Angeles and worldwide.">

@@ -967,7 +967,6 @@ const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
    Never touches or delays the message the client sees.
    ============================================================ */
 const CCQuote = (function(){
-
 const TYPES={commercial:'Commercial',realestate:'Real estate',event:'Event coverage',shortfilm:'Short film',documentary:'Documentary',musicvideo:'Music video',social:'Social media content',other:'Other'};
 const CLIENTS={local:'Local business',realestate:'Real estate',religious:'Non-profit / community organization',creator:'Influencer / creator',brand:'Brand / corporate',other:'Other'};
 const METROS=['Dallas–Fort Worth','Miami','Chicago','New York','Los Angeles'];
@@ -977,19 +976,19 @@ const BUDGET_RANGE={u1:[0,1000],b1:[1000,2500],b2:[2500,5000],b3:[5000,Infinity]
 const PLATFORMS=['Instagram','TikTok','YouTube','Facebook','LinkedIn'];
 
 const PKGS=[
- {id:'reels-starter',name:'Reels Starter',mode:'monthly',price:750,shoot:false,items:['4 edited Reels a month from the client’s footage','Captions, music and cover frames','Monthly content calendar','Captions written and posts scheduled on 1 platform']},
- {id:'reels-growth',name:'Reels Growth',mode:'monthly',price:1400,shoot:false,items:['8 edited Reels a month from the client’s footage','2 carousels or graphics a month','Captions, music and cover frames','Content calendar and a monthly check-in call','Captions written and posts scheduled on 1 platform']},
- {id:'content-engine',name:'Content Engine',mode:'monthly',price:2600,shoot:true,items:['1 half-day shoot a month (up to 4 hrs)','12 Reels and 2 mid-length videos (1–3 min)','Color, sound and captions','Captions written and posts scheduled on 1 platform','Monthly strategy call and content calendar']},
- {id:'content-ads',name:'Content + Ads',mode:'monthly',price:3500,shoot:true,items:['Everything in Content Engine','Targeted ads on up to $3,000 a month of ad spend','Monthly report: reach, clicks, leads, cost per result']},
- {id:'real-estate',name:'Real Estate Retainer',mode:'monthly',price:2950,shoot:true,items:['4 listing videos a month (2–3 min each)','6 Reels cut from the listing footage','Drone footage on every listing','Captions and music','Captions written and posts scheduled on 1 platform']},
- {id:'community',name:'Nonprofit & Community Media',mode:'monthly',price:2400,shoot:true,noDiscount:true,items:['2 events, programs or talks covered a month (up to 4 hrs each)','8 Reels from events and talks','1 recap video (1–3 min)','Weekly content calendar','Captions written and posts scheduled on 1 platform']},
- {id:'reel-day',name:'Reel Day',mode:'once',price:1350,shoot:true,items:['Half-day shoot (up to 4 hrs)','4 edited Reels','Captions, music and color']},
- {id:'listing',name:'Listing Video',mode:'once',price:750,shoot:true,items:['One property, 2–3 min tour','Drone footage','1 Reel cut from the same shoot','Captions and music']},
- {id:'event-highlight',name:'Event Highlight',mode:'once',price:1250,shoot:true,items:['Up to 4 hrs of coverage','2–3 min highlight video','1 Reel','Color and sound']},
- {id:'spot',name:'Spot Commercial',mode:'once',price:2500,shoot:true,items:['Concept and shot list','Half-day shoot (up to 4 hrs)','1 hero spot (30–60 sec) and 2 cutdowns','Color, sound and captions']},
- {id:'campaign',name:'Commercial Campaign',mode:'once',price:5200,shoot:true,items:['Concept, script and shot list','Full-day shoot (up to 8 hrs)','1 hero video, 4 cutdowns and 6 Reels','15 edited stills','Color, sound and captions']},
- {id:'music-video',name:'Music Video',mode:'once',price:2800,shoot:true,items:['1 shoot day at 1 location','Performance video, up to 4 min','2 teaser Reels','Color grade']},
- {id:'mini-doc',name:'Mini-Doc / Brand Story',mode:'once',price:3500,shoot:true,items:['Interview day (up to 8 hrs)','Story edit, up to 5 min','Color, sound and captions']}
+ {id:'reels-starter',cost:[0,4,0],name:'Reels Starter',mode:'monthly',price:750,shoot:false,items:['4 edited Reels a month from the client’s footage','Captions, music and cover frames','Monthly content calendar','Captions written and posts scheduled on 1 platform']},
+ {id:'reels-growth',cost:[0,8,0],name:'Reels Growth',mode:'monthly',price:1400,shoot:false,items:['8 edited Reels a month from the client’s footage','2 carousels or graphics a month','Captions, music and cover frames','Content calendar and a monthly check-in call','Captions written and posts scheduled on 1 platform']},
+ {id:'content-engine',cost:[1,12,2],name:'Content Engine',mode:'monthly',price:2600,shoot:true,items:['1 half-day shoot a month (up to 4 hrs)','12 Reels and 2 mid-length videos (1–3 min)','Color, sound and captions','Captions written and posts scheduled on 1 platform','Monthly strategy call and content calendar']},
+ {id:'content-ads',cost:[1,12,2],name:'Content + Ads',mode:'monthly',price:3500,shoot:true,items:['Everything in Content Engine','Targeted ads on up to $3,000 a month of ad spend','Monthly report: reach, clicks, leads, cost per result']},
+ {id:'real-estate',cost:[3,6,3],name:'Real Estate Retainer',mode:'monthly',price:2950,shoot:true,items:['3 listing videos a month (2–3 min each)','6 Reels cut from the listing footage','Drone footage on every listing','Captions and music','Captions written and posts scheduled on 1 platform']},
+ {id:'community',cost:[2,8,1],name:'Nonprofit & Community Media',mode:'monthly',price:2400,shoot:true,noDiscount:true,items:['2 events, programs or talks covered a month (up to 4 hrs each)','8 Reels from events and talks','1 recap video (1–3 min)','Weekly content calendar','Captions written and posts scheduled on 1 platform']},
+ {id:'reel-day',cost:[1,4,0],name:'Reel Day',mode:'once',price:1350,shoot:true,items:['Half-day shoot (up to 4 hrs)','4 edited Reels','Captions, music and color']},
+ {id:'listing',cost:[1,1,1],name:'Listing Video',mode:'once',price:900,shoot:true,items:['One property, 2–3 min tour','Drone footage','1 Reel cut from the same shoot','Captions and music']},
+ {id:'event-highlight',cost:[1,1,1],name:'Event Highlight',mode:'once',price:1250,shoot:true,items:['Up to 4 hrs of coverage','2–3 min highlight video','1 Reel','Color and sound']},
+ {id:'spot',cost:[1,2,1],name:'Spot Commercial',mode:'once',price:2500,shoot:true,items:['Concept and shot list','Half-day shoot (up to 4 hrs)','1 hero spot (30–60 sec) and 2 cutdowns','Color, sound and captions']},
+ {id:'campaign',cost:[1,10,1],name:'Commercial Campaign',mode:'once',price:5200,shoot:true,items:['Concept, script and shot list','Full-day shoot (up to 8 hrs)','1 hero video, 4 cutdowns and 6 Reels','15 edited stills','Color, sound and captions']},
+ {id:'music-video',cost:[1,2,1],name:'Music Video',mode:'once',price:2800,shoot:true,items:['1 shoot day at 1 location','Performance video, up to 4 min','2 teaser Reels','Color grade']},
+ {id:'mini-doc',cost:[1,0,1],name:'Mini-Doc / Brand Story',mode:'once',price:3500,shoot:true,items:['Interview day (up to 8 hrs)','Story edit, up to 5 min','Color, sound and captions']}
 ];
 const MGMT={
  essential:['Monthly content calendar planned around your goals','Captions written for every post, with hashtags','Posts uploaded and scheduled on time','Cover frames and formatting for each platform','Monthly check-in message'],
@@ -998,17 +997,18 @@ const MGMT={
 const PKG_BY_ID=Object.fromEntries(PKGS.map(p=>[p.id,p]));
 
 const DEFAULTS={
- shoot:{mini:550,half:850,full:1500,extraHour:175,crewHalf:250,crewFull:450},
- edit:{reel:150,std:350,long:750,feature:1800},
+ shoot:{mini:550,half:850,full:1500,extraHour:175,crewHalf:400,crewFull:550},
+ edit:{reel:150,std:400,long:750,feature:1800},
  volume:{v5:.10,v13:.15,v21:.20},
- typeShoot:{commercial:1.8,realestate:.45,event:1,shortfilm:1.5,documentary:1.2,musicvideo:1.2,social:.8,other:1},
- typeEdit:{commercial:1.3,realestate:.75,event:1,shortfilm:1.4,documentary:1.6,musicvideo:1.25,social:1,other:1},
+ typeShoot:{commercial:1.8,realestate:.65,event:1,shortfilm:1.5,documentary:1.2,musicvideo:1.2,social:.8,other:1},
+ typeEdit:{commercial:1.3,realestate:.85,event:1,shortfilm:1.4,documentary:1.6,musicvideo:1.25,social:1,other:1},
  typePre:{commercial:.10,realestate:0,event:0,shortfilm:.15,documentary:.12,musicvideo:.10,social:0,other:0},
  mgmt:{first:900,extra:350,eFirst:600,eExtra:250},
  ads:{min:1000,pct:.15},
  extras:{photos:300,call:150,subs:15,drone:200,rush:.35},
  travel:{other:1500},
  clientMult:{local:1,realestate:1,religious:.9,creator:.95,brand:1.15,other:1},
+ cost:{shooter:250,reel:50,big:200,warn:.35},
  minProject:750,
  pkgExtraReel:150,
  spread:{low:.90,high:1.15,floor:.85},
@@ -1174,6 +1174,29 @@ function calcTier(S,R,k){
  if(res.lines.length)res.contents=(res.contents||[]).concat(['Revisions and scheduling:'],TIER_ITEMS[k]);
  return res;
 }
+function hireCost(S,R){
+ let s=0,r=0,b=0,rec;
+ if(S.tab==='custom'){ rec=S.mode==='monthly';
+  if(S.film&&S.shoots>0)s=S.shoots*(1+(S.crew||0));
+  if(S.edit){ r=S.nReel||0; b=(S.nStd||0)+(S.nLong||0)+(S.nFeature||0); } }
+ else { const p=PKG_BY_ID[S.pkg]; if(!p)return null; rec=p.mode==='monthly'; s=p.cost[0]; r=p.cost[1]+(S.pkgReels||0); b=p.cost[2]; }
+ const parts=[];
+ if(s>0)parts.push(plural(s,'videographer booking')+' × '+money(R.cost.shooter));
+ if(r>0)parts.push(plural(r,'Reel edit')+' × '+money(R.cost.reel));
+ if(b>0)parts.push(plural(b,'larger edit')+' × '+money(R.cost.big));
+ return {s,r,b,rec,parts,total:s*R.cost.shooter+r*R.cost.reel+b*R.cost.big};
+}
+function profitFor(S,res,R){
+ const c=hireCost(S,R); if(!c||!c.total)return null;
+ let rev=0; for(const l of res.lines){ if(l.rec===c.rec&&!/^Travel/.test(l.label))rev+=l.amt; }
+ if(rev<=0)return null;
+ const keep=rev-c.total, pct=keep/rev, per=c.rec?' a month':'';
+ const cls=keep<=0?'bad':pct<R.cost.warn?'warn':'ok';
+ const text='If you hire out all the filming and editing: '+c.parts.join(' + ')+' = '+money(c.total)+per+'. '+
+  (keep>0?'You keep '+money(keep)+per+' of '+money(rev)+' ('+pctText(pct)+').':'You would lose '+money(-keep)+per+'.')+
+  (cls==='warn'?' Thin. Film or edit part of this yourself, or raise the price.':cls==='bad'?' Do not hire this one out at this price.':'');
+ return {cost:c.total,rev,keep,pct,cls,rec:c.rec,text};
+}
 function priceText(r){ return [r.once>0?money(r.once):'',r.rec>0?money(r.rec)+'/mo':''].filter(Boolean).join(' + '); }
 /* ---- form -> suggestion mapper (mirrors the quote generator's own engine) ---- */
 const PTYPE_MAP={'Commercial':'commercial','Real estate':'realestate','Event coverage':'event','Short film':'shortfilm','Documentary':'documentary','Music video':'musicvideo','Social media content':'social','Other':'other'};
@@ -1282,13 +1305,16 @@ function buildReport(name,email,raw,R){
  if(fit) out['3. Fits their stated budget?']=fit.text;
  out['4. What to offer']=contents(primary.res)||'(nothing priced — check their answers, something may be missing)';
  out['5. Price breakdown']=lines(primary.res);
+ const pf=profitFor(primary.state,primary.res,R);
+ out['6. Your profit (not for the client)']=pf?pf.text:'Nothing to hire out here. This quote has no filming or editing in it, so the fee is yours.';
  if(pkgResult && customResult.res.lines.length){
-  out['6. Cross-check: built from their exact answers instead']=tierLine(customResult.res)+'\n'+lines(customResult.res);
+  const pf2=profitFor(customResult.state,customResult.res,R);
+  out['7. Cross-check: built from their exact answers instead']=tierLine(customResult.res)+'\n'+lines(customResult.res)+(pf2?'\n'+pf2.text:'');
  }
- out['7. Why this number']=why.map(w=>'- '+w).join('\n');
- out['8. Terms to offer']=termsList(primary.res,R).join('\n');
- out['9. Adjust it yourself']='Open the quote generator to change rates, pick a different package or tier, and copy a client-ready message: '+GEN_URL;
- out['10. Note']='The numbers above are an automated suggestion to save you a step — sanity-check before replying.';
+ out['8. Why this number']=why.map(w=>'- '+w).join('\n');
+ out['9. Terms to offer']=termsList(primary.res,R).join('\n');
+ out['10. Adjust it yourself']='Open the quote generator to change rates, pick a different package or tier, and copy a client-ready message: '+GEN_URL;
+ out['11. Note']='The numbers above are an automated suggestion to save you a step — sanity-check before replying.';
  return out;
 }
  return { buildReport: function(name,email,raw){ const R=JSON.parse(JSON.stringify(DEFAULTS)); return buildReport(name,email,raw,R); } };

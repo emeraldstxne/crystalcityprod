@@ -1387,6 +1387,7 @@ function buildReport(name,email,raw,R){
     try{
       const report = CCQuote.buildReport(data['Name'], data['Email'], collectRaw());
       const merged = Object.assign({}, data);
+      merged['▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'] = 'SUGGESTED QUOTE — generated automatically from the answers above ↓';
       for(const k in report){ if(k === '_subject' || k === 'Lead') continue; merged[k] = report[k]; }
       const price = (report['1. Suggested price (Standard)'] || '').split('  —')[0].trim();
       merged['_subject'] = 'New quote request: ' + data['Name'] + (price ? '  —  suggested ' + price : '');

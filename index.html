@@ -171,6 +171,11 @@ body.menu-open .mobile-menu{clip-path:inset(0 0 0 0); pointer-events:auto}
    ============================================================ */
 .hero{min-height:100svh; display:flex; align-items:center; padding:150px 0 90px; overflow:hidden}
 .hero-bg{position:absolute; inset:0; z-index:0; pointer-events:none}
+.hero-bg{overflow:hidden}
+.hero-video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; opacity:.55; filter:saturate(1.05) contrast(1.05)}
+.hero-vshade{position:absolute; inset:0; z-index:1; background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,.35) 45%,rgba(0,0,0,.85) 100%),radial-gradient(ellipse at center,rgba(0,0,0,.15),rgba(0,0,0,.6))}
+.hero-bg .grid,.hero-bg .glow,.hero-bg .skyline{z-index:2}
+@media (prefers-reduced-motion:reduce){.hero-video{display:none}}
 .hero-bg .glow{
   position:absolute; left:50%; top:38%; width:min(1500px,150vw); aspect-ratio:1; transform:translate(-50%,-50%);
   background:radial-gradient(circle, var(--gold-glow) 0%, rgba(233,188,83,.05) 32%, transparent 63%);
@@ -684,6 +689,8 @@ html body .w-cap b{font-size:clamp(13px,1.35vw,19px)!important}
 <!-- ===================== HERO ===================== -->
 <section class="hero" id="top">
   <div class="hero-bg">
+    <video class="hero-video" src="assets/video/phreeart.mp4" poster="assets/video/phreeart-poster.jpg" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+    <div class="hero-vshade"></div>
     <div class="grid"></div>
     <div class="glow"></div>
     <svg class="skyline" viewBox="0 0 1440 420" preserveAspectRatio="none" aria-hidden="true">

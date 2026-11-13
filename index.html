@@ -959,6 +959,342 @@ html body .w-cap b{font-size:clamp(13px,1.35vw,19px)!important}
 const QUOTE_ENDPOINT = "https://formsubmit.co/ajax/crystalcityprod@gmail.com";
 const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
 
+/* ============================================================
+   1b) SUGGESTED QUOTE — runs the same pricing engine as the
+   internal quote generator (https://claude.ai/artifact/5Xw4rrR7ZBDEjKGZ2zsFMM)
+   against each submission and emails a second message with a
+   suggested price, a breakdown and the reasoning behind it.
+   Never touches or delays the message the client sees.
+   ============================================================ */
+const CCQuote = (function(){
+
+const TYPES={commercial:'Commercial',realestate:'Real estate',event:'Event coverage',shortfilm:'Short film',documentary:'Documentary',musicvideo:'Music video',social:'Social media content',other:'Other'};
+const CLIENTS={local:'Local business',realestate:'Real estate',religious:'Non-profit / community organization',creator:'Influencer / creator',brand:'Brand / corporate',other:'Other'};
+const METROS=['Dallas–Fort Worth','Miami','Chicago','New York','Los Angeles'];
+const ELSEWHERE='Somewhere else';
+const BUDGETS={'':'Not sure yet',u1:'Under $1,000',b1:'$1,000–$2,500',b2:'$2,500–$5,000',b3:'$5,000+'};
+const BUDGET_RANGE={u1:[0,1000],b1:[1000,2500],b2:[2500,5000],b3:[5000,Infinity]};
+const PLATFORMS=['Instagram','TikTok','YouTube','Facebook','LinkedIn'];
+
+const PKGS=[
+ {id:'reels-starter',name:'Reels Starter',mode:'monthly',price:750,shoot:false,items:['4 edited Reels a month from the client’s footage','Captions, music and cover frames','Monthly content calendar','Captions written and posts scheduled on 1 platform']},
+ {id:'reels-growth',name:'Reels Growth',mode:'monthly',price:1400,shoot:false,items:['8 edited Reels a month from the client’s footage','2 carousels or graphics a month','Captions, music and cover frames','Content calendar and a monthly check-in call','Captions written and posts scheduled on 1 platform']},
+ {id:'content-engine',name:'Content Engine',mode:'monthly',price:2600,shoot:true,items:['1 half-day shoot a month (up to 4 hrs)','12 Reels and 2 mid-length videos (1–3 min)','Color, sound and captions','Captions written and posts scheduled on 1 platform','Monthly strategy call and content calendar']},
+ {id:'content-ads',name:'Content + Ads',mode:'monthly',price:3500,shoot:true,items:['Everything in Content Engine','Targeted ads on up to $3,000 a month of ad spend','Monthly report: reach, clicks, leads, cost per result']},
+ {id:'real-estate',name:'Real Estate Retainer',mode:'monthly',price:2950,shoot:true,items:['4 listing videos a month (2–3 min each)','6 Reels cut from the listing footage','Drone footage on every listing','Captions and music','Captions written and posts scheduled on 1 platform']},
+ {id:'community',name:'Nonprofit & Community Media',mode:'monthly',price:2400,shoot:true,noDiscount:true,items:['2 events, programs or talks covered a month (up to 4 hrs each)','8 Reels from events and talks','1 recap video (1–3 min)','Weekly content calendar','Captions written and posts scheduled on 1 platform']},
+ {id:'reel-day',name:'Reel Day',mode:'once',price:1350,shoot:true,items:['Half-day shoot (up to 4 hrs)','4 edited Reels','Captions, music and color']},
+ {id:'listing',name:'Listing Video',mode:'once',price:750,shoot:true,items:['One property, 2–3 min tour','Drone footage','1 Reel cut from the same shoot','Captions and music']},
+ {id:'event-highlight',name:'Event Highlight',mode:'once',price:1250,shoot:true,items:['Up to 4 hrs of coverage','2–3 min highlight video','1 Reel','Color and sound']},
+ {id:'spot',name:'Spot Commercial',mode:'once',price:2500,shoot:true,items:['Concept and shot list','Half-day shoot (up to 4 hrs)','1 hero spot (30–60 sec) and 2 cutdowns','Color, sound and captions']},
+ {id:'campaign',name:'Commercial Campaign',mode:'once',price:5200,shoot:true,items:['Concept, script and shot list','Full-day shoot (up to 8 hrs)','1 hero video, 4 cutdowns and 6 Reels','15 edited stills','Color, sound and captions']},
+ {id:'music-video',name:'Music Video',mode:'once',price:2800,shoot:true,items:['1 shoot day at 1 location','Performance video, up to 4 min','2 teaser Reels','Color grade']},
+ {id:'mini-doc',name:'Mini-Doc / Brand Story',mode:'once',price:3500,shoot:true,items:['Interview day (up to 8 hrs)','Story edit, up to 5 min','Color, sound and captions']}
+];
+const MGMT={
+ essential:['Monthly content calendar planned around your goals','Captions written for every post, with hashtags','Posts uploaded and scheduled on time','Cover frames and formatting for each platform','Monthly check-in message'],
+ full:['Monthly content calendar planned around your goals','Captions written for every post, with hashtags','Posts uploaded and scheduled every week, including Stories','Cover frames and formatting for each platform','Comment and DM replies on a set schedule (up to 30 min a day)','Hashtag and keyword research, plus profile and bio upkeep','Monthly report: reach, growth, top posts, what to change','Monthly strategy call']
+};
+const PKG_BY_ID=Object.fromEntries(PKGS.map(p=>[p.id,p]));
+
+const DEFAULTS={
+ shoot:{mini:550,half:850,full:1500,extraHour:175,crewHalf:250,crewFull:450},
+ edit:{reel:150,std:350,long:750,feature:1800},
+ volume:{v5:.10,v13:.15,v21:.20},
+ typeShoot:{commercial:1.8,realestate:.45,event:1,shortfilm:1.5,documentary:1.2,musicvideo:1.2,social:.8,other:1},
+ typeEdit:{commercial:1.3,realestate:.75,event:1,shortfilm:1.4,documentary:1.6,musicvideo:1.25,social:1,other:1},
+ typePre:{commercial:.10,realestate:0,event:0,shortfilm:.15,documentary:.12,musicvideo:.10,social:0,other:0},
+ mgmt:{first:900,extra:350,eFirst:600,eExtra:250},
+ ads:{min:1000,pct:.15},
+ extras:{photos:300,call:150,subs:15,drone:200,rush:.35},
+ travel:{other:1500},
+ clientMult:{local:1,realestate:1,religious:.9,creator:.95,brand:1.15,other:1},
+ minProject:750,
+ pkgExtraReel:150,
+ spread:{low:.90,high:1.15,floor:.85},
+ deposit:.5,
+ validDays:14,
+ pkg:Object.fromEntries(PKGS.map(p=>[p.id,p.price]))
+};
+
+function makeState(R){return {
+ tab:'packages',client:'',clientType:'local',budget:'',loc:METROS[0],travel:R.travel.other,
+ mode:'monthly',type:'social',film:true,edit:true,manage:false,ads:false,
+ shoots:1,hours:4,crew:0,drone:0,nReel:8,nStd:2,nLong:0,nFeature:0,subs:false,
+ platforms:{Instagram:true,TikTok:true},adSpend:1500,photos:0,calls:0,rush:false,
+ mgmtLevel:'essential',cur:3000,goal:10000,longGoal:25000,monthsLeft:24,pick:'target',pkg:'content-engine',pkgReels:0,pkgMgmt:'none',pkgPlat:1,pkgRush:false,out:'quote'};}
+
+const r5=x=>Math.round(x/5)*5;
+const r25=x=>Math.round(x/25)*25;
+function money(n){const v=Math.round(n);return (v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US');}
+function pctText(x){return Math.round(x*100)+'%';}
+function shootPrice(h,R){ if(h<=2)return R.shoot.mini; if(h<=4)return R.shoot.half; if(h<=8)return R.shoot.full; return R.shoot.full+(h-8)*R.shoot.extraHour; }
+function volumePct(n,R){ return n>=21?R.volume.v21:n>=13?R.volume.v13:n>=5?R.volume.v5:0; }
+function plural(n,w){return n+' '+w+(n===1?'':'s');}
+const inMetro=S=>METROS.includes(S.loc);
+
+function finish(L,extra){
+ let once=0,rec=0;
+ for(const l of L){ if(l.rec)rec+=l.amt; else once+=l.amt; }
+ return Object.assign({lines:L,once,rec},extra||{});
+}
+
+function adjustLines(L,S,R,add){
+ const mult=R.clientMult[S.clientType]; if(!mult||mult===1)return;
+ const label=(mult<1?'Community / client rate':'Brand / corporate rate')+' ('+(mult<1?'−':'+')+Math.round(Math.abs(1-mult)*100)+'%)';
+ let so=0,sr=0; for(const l of L){ if(l.fee){ if(l.rec)sr+=l.amt; else so+=l.amt; } }
+ if(so)add(label,'',so*(mult-1),false,false);
+ if(sr)add(label,'',sr*(mult-1),true,false);
+}
+
+function calcCustom(S,R){
+ const L=[]; const rec=S.mode==='monthly'; const t=S.type; let mgmtItems=null;
+ const add=(label,detail,amt,recFlag,fee=true)=>{ const a=r5(amt); if(a!==0)L.push({label,detail,amt:a,rec:recFlag,fee}); return a; };
+ let prod=0, nVid=0;
+ if(S.film&&S.shoots>0){
+  prod+=add('Filming',plural(S.shoots,'shoot')+', '+S.hours+' hrs each',shootPrice(S.hours,R)*R.typeShoot[t]*S.shoots,rec);
+  if(S.crew>0)prod+=add('Added crew',plural(S.crew,'crew member')+' on '+plural(S.shoots,'shoot'),S.crew*S.shoots*(S.hours<=4?R.shoot.crewHalf:R.shoot.crewFull),rec);
+  if(S.drone>0)prod+=add('Drone footage',plural(Math.min(S.drone,S.shoots),'shoot')+' with aerials',Math.min(S.drone,S.shoots)*R.extras.drone,rec);
+ }
+ if(S.edit){
+  const items=[['reel',S.nReel,'Reel'],['std',S.nStd,'standard video'],['long',S.nLong,'long-form video'],['feature',S.nFeature,'feature cut']];
+  let gross=0; const parts=[];
+  for(const [k,q,lab] of items){ if(q>0){ gross+=q*R.edit[k]*R.typeEdit[t]; nVid+=q; parts.push(plural(q,lab)); } }
+  if(nVid>0){
+   prod+=add('Editing, color and sound',parts.join(', '),gross,rec);
+   const pct=volumePct(nVid,R);
+   if(pct>0)prod+=add('Volume discount',nVid+' videos, '+pctText(pct)+' off editing',-gross*pct,rec,true);
+  }
+ }
+ const pre=R.typePre[t];
+ if(pre>0&&prod>0)prod+=add('Creative development and pre-production',pctText(pre)+' of production',prod*pre,rec);
+ if(S.photos>0)add('Photos and graphics',plural(S.photos,'batch')+' of edited stills',S.photos*R.extras.photos,rec);
+ if(S.calls>0)add('Strategy calls',plural(S.calls,'call'),S.calls*R.extras.call,rec);
+ if(S.subs&&nVid>0)add('Subtitle files and translations',plural(nVid,'video'),nVid*R.extras.subs,rec);
+ if(S.rush&&prod>0)add('Rush turnaround','+'+pctText(R.extras.rush)+' on production and editing',prod*R.extras.rush,rec);
+ if(S.manage){
+  const pc=Math.max(1,PLATFORMS.filter(p=>S.platforms[p]).length);
+  const full=S.mgmtLevel==='full';
+  add('Social media management, '+(full?'Full':'Essentials'),plural(pc,'platform')+(full?': posting, engagement, reporting':': posting and scheduling'),full?R.mgmt.first+(pc-1)*R.mgmt.extra:R.mgmt.eFirst+(pc-1)*R.mgmt.eExtra,true);
+  mgmtItems=MGMT[full?'full':'essential'];
+ }
+ if(S.ads){
+  add('Targeted ads and monthly metrics report','Management on '+money(S.adSpend)+' a month of ad spend, paid to the platform separately',Math.max(R.ads.min,R.ads.pct*S.adSpend),true);
+ }
+ adjustLines(L,S,R,add);
+ const out0=S.mode==='once';
+ if(out0&&(S.film||S.edit)){
+  const base=L.filter(l=>!l.rec).reduce((a,l)=>a+l.amt,0);
+  if(base>0&&base<R.minProject)add('Project minimum','',R.minProject-base,false,false);
+ }
+ if(S.film&&S.shoots>0&&!inMetro(S)&&S.travel>0)add('Travel and lodging (estimate)','Final travel is quoted per project',S.travel,rec,false);
+ return finish(L,{title:TYPES[t]+' · '+(rec?'Ongoing, monthly':'One-time project'),mode:S.mode,contents:mgmtItems?['Social media management includes:'].concat(mgmtItems):null});
+}
+
+function calcPackage(S,R){
+ const p=PKG_BY_ID[S.pkg]; const L=[];
+ if(!p)return finish(L,{title:'',mode:'once'});
+ const rec=p.mode==='monthly';
+ const add=(label,detail,amt,recFlag,fee=true)=>{ const a=r5(amt); if(a!==0)L.push({label,detail,amt:a,rec:recFlag,fee}); };
+ const price=R.pkg[p.id]; add(p.name,rec?'Per month':'One-time',price,rec);
+ if(S.pkgReels>0)add('Additional Reels',plural(S.pkgReels,'Reel')+' at '+money(R.pkgExtraReel)+' each',S.pkgReels*R.pkgExtraReel,rec);
+ let items=p.items.slice();
+ if(rec){ const full=S.pkgMgmt==='full', pc=Math.min(5,Math.max(1,Math.round(S.pkgPlat)||1)); const SCHED='Captions written and posts scheduled on 1 platform';
+  if(full){ add('Upgrade to full social media management',plural(pc,'platform'),(R.mgmt.first-R.mgmt.eFirst)+(pc-1)*R.mgmt.extra,true);
+   items=items.filter(i=>i!==SCHED).concat(['Full social media management on '+plural(pc,'platform')+':'],MGMT.full); }
+  else if(pc>1){ add('Additional platforms',plural(pc-1,'more platform')+', captions and scheduling',(pc-1)*R.mgmt.eExtra,true);
+   items=items.map(i=>i===SCHED?'Captions written and posts scheduled on '+pc+' platforms':i); }
+ }
+ if(S.pkgRush)add(rec?'Rush start, first month':'Rush turnaround',rec?'One-time priority fee: +'+pctText(R.extras.rush)+' of the monthly price':'+'+pctText(R.extras.rush),price*R.extras.rush,false);
+ if(!p.noDiscount)adjustLines(L,S,R,add);
+ if(p.shoot&&!inMetro(S)&&S.travel>0)add('Travel and lodging (estimate)','Final travel is quoted per project',S.travel,rec,false);
+ return finish(L,{title:p.name+(rec?' · Monthly':' · One-time'),mode:p.mode,contents:items});
+}
+
+function calc(S,R){ return S.tab==='custom'?calcCustom(S,R):calcPackage(S,R); }
+
+function fitFor(S,res,R){
+ const r=BUDGET_RANGE[S.budget]; if(!r)return null;
+ const amt=res.mode==='monthly'?res.rec:(res.once||res.rec); if(!amt)return null;
+ const [lo,hi]=r;
+ const mult=R.clientMult[S.clientType]||1;
+ if(amt>hi){
+  let best=null;
+  for(const p of PKGS){ if(p.mode!==(res.mode==='monthly'?'monthly':'once'))continue;
+   const price=R.pkg[p.id]*(p.noDiscount?1:mult); if(price<=hi&&(!best||price>best.price))best={name:p.name,price}; }
+  return {cls:'bad',text:'Over their budget by '+money(amt-hi)+'.'+(best?' Closest package at or under it: '+best.name+' ('+money(best.price)+').':' Trim the scope to fit.')};
+ }
+ if(amt<lo)return {cls:'warn',text:'Under their budget range by '+money(lo-amt)+'. Room to add Reels, drone or ads.'};
+ return {cls:'ok',text:'Fits the budget they selected ('+BUDGETS[S.budget]+').'};
+}
+
+function termsList(res,R){
+ const t=[];
+ if(res.once>0){ const dep=r5(res.once*R.deposit); t.push('Payment: '+pctText(R.deposit)+' to book ('+money(dep)+'), '+pctText(1-R.deposit)+' on delivery ('+money(res.once-dep)+').'); }
+ if(res.rec>0)t.push('Monthly work is billed on the same date each month. '+(res.tier==='low'?'3-month minimum, then month-to-month with 14 days’ notice to pause or cancel.':'Month-to-month, with 14 days’ notice to pause or cancel.'));
+ if(res.lines.some(l=>/ad spend|Targeted ads/.test(l.label+l.detail)))t.push('Ad spend is paid directly to the platform and is separate from our fee.');
+ t.push('You own the footage and the final videos, with full commercial rights. '+(res.tier==='high'?'Raw footage is included.':'Raw files on request.'));
+ t.push('This quote is valid for '+R.validDays+' days.');
+ return t;
+}
+function lineText(l){ return l.label+(l.detail?' ('+l.detail+')':'')+': '+money(l.amt)+(l.rec?' a month':''); }
+function totalsText(res){
+ const o=[]; if(res.once>0)o.push('Project total: '+money(res.once)); if(res.rec>0)o.push('Monthly: '+money(res.rec)+' a month'); return o;
+}
+function quoteText(res,S,R,date){
+ const o=['CRYSTAL CITY PRODUCTIONS','Quote for '+(S.client.trim()||'your project')+' · '+date,res.title,''];
+ if(res.contents){ o.push('WHAT’S INCLUDED'); res.contents.forEach(c=>o.push(/:$/.test(c)?c:'• '+c)); o.push(''); }
+ o.push('PRICING'); res.lines.forEach(l=>o.push('• '+lineText(l))); o.push('');
+ totalsText(res).forEach(x=>o.push(x)); o.push('');
+ termsList(res,R).forEach(x=>o.push(x)); o.push('');
+ o.push('Questions? crystalcityprod@gmail.com · Book a call: crystalcityprod.com/call');
+ return o.join('\n');
+}
+function whatsappText(res,S,R){
+ const first=(S.client.trim().split(/\s+/)[0])||'there';
+ const o=['*Your Crystal City Productions quote*','','Hi '+first+', thank you for reaching out! Here is what we put together based on what you shared.','',res.title,''];
+ if(res.contents){ res.contents.forEach(c=>o.push(/:$/.test(c)?c:'• '+c)); o.push(''); }
+ res.lines.forEach(l=>o.push('• '+lineText(l))); o.push('');
+ totalsText(res).forEach(x=>o.push('*'+x+'*')); o.push('');
+ termsList(res,R).forEach(x=>o.push(x)); o.push('');
+ o.push('If this looks good, reply here and I will send the invoice to get you on the calendar. Want to talk it through first? Book a quick call: crystalcityprod.com/call','','Em, Crystal City Productions');
+ return o.join('\n');
+}
+const PICKS={low:'Lean',target:'Standard',high:'Premium'};
+const TIER_ITEMS={
+ low:['1 round of revisions','Flexible delivery date, scheduled around other projects'],
+ target:['2 rounds of revisions','Standard scheduling'],
+ high:['3 rounds of revisions','Priority scheduling and first in the edit queue','Raw footage delivered with the final files']};
+function tierFactor(k,R){ return k==='low'?R.spread.low:k==='high'?R.spread.high:1; }
+function calcTier(S,R,k){
+ const res=calc(S,R); const f=tierFactor(k,R);
+ if(f!==1)for(const l of res.lines){ if(!/^Travel/.test(l.label))l.amt=r5(l.amt*f); }
+ res.once=0; res.rec=0; for(const l of res.lines){ if(l.rec)res.rec+=l.amt; else res.once+=l.amt; }
+ res.tier=k;
+ if(res.lines.length)res.contents=(res.contents||[]).concat(['Revisions and scheduling:'],TIER_ITEMS[k]);
+ return res;
+}
+function priceText(r){ return [r.once>0?money(r.once):'',r.rec>0?money(r.rec)+'/mo':''].filter(Boolean).join(' + '); }
+/* ---- form -> suggestion mapper (mirrors the quote generator's own engine) ---- */
+const PTYPE_MAP={'Commercial':'commercial','Real estate':'realestate','Event coverage':'event','Short film':'shortfilm','Documentary':'documentary','Music video':'musicvideo','Social media content':'social','Other':'other'};
+const WHO_MAP={'Local business':'local','Real estate':'realestate','Religious institution / non-profit':'religious','Influencer / creator':'creator','Brand / corporate':'brand','Other':'other'};
+const COUNT_MAP={'1–4':3,'5–12':8,'13–20':16,'20+':24,'None (ads / management only)':0};
+const SHOOTS_MAP={'1–4':1,'5–12':1,'13–20':2,'20+':3};
+const BUDGET_MAP={'Under $1,000':'u1','$1,000–$2,500':'b1','$2,500–$5,000':'b2','$5,000+':'b3'};
+const SOCIAL_PLATFORMS=['Instagram','TikTok','YouTube','Facebook','LinkedIn'];
+
+function pickPackage(f){
+ const t=f.ptypes, mo=f.mode;
+ if(f.who==='Religious institution / non-profit') return {id:'community',why:"Client type: Religious institution / non-profit → matched to Nonprofit & Community Media"+(mo==='once'?' (that package is monthly only; switched the quote to monthly)':'')};
+ if(t.includes('Real estate')) return {id:mo==='once'?'listing':'real-estate',why:"Project type: Real estate → matched to "+(mo==='once'?'Listing Video':'the Real Estate Retainer')};
+ if(t.includes('Event coverage')) return {id:'event-highlight',why:"Project type: Event coverage → matched to Event Highlight"+(mo==='monthly'?' (event coverage is normally one-time; see the custom estimate below for an ongoing number)':'')};
+ if(t.includes('Music video')) return {id:'music-video',why:"Project type: Music video → matched to the Music Video package"};
+ if(t.includes('Documentary')||t.includes('Short film')) return {id:'mini-doc',why:"Project type: "+(t.includes('Documentary')?'Documentary':'Short film')+" → matched to Mini-Doc / Brand Story"};
+ if(t.includes('Commercial')){
+  if(mo==='monthly') return {id:f.ads?'content-ads':'content-engine',why:"Project type: Commercial, ongoing → matched to "+(f.ads?'Content + Ads':'Content Engine')};
+  return {id:(f.countGuess||0)>=13?'campaign':'spot',why:"Project type: Commercial, one-time → matched to "+((f.countGuess||0)>=13?'a Commercial Campaign (larger video count)':'a Spot Commercial')};
+ }
+ if(f.manage||t.includes('Social media content')||(f.edit&&!f.film)){
+  if(mo==='once'){
+   if(f.film) return {id:'reel-day',why:"Social content, one-time, with filming → matched to Reel Day"};
+   return {id:null,why:"Editing or management only, one-time, has no fixed package → used the custom estimate instead"};
+  }
+  if(f.film) return {id:'content-engine',why:"Needs filming plus ongoing content → matched to Content Engine"};
+  return {id:(f.countGuess||0)>4?'reels-growth':'reels-starter',why:"Editing / management only, ongoing → matched to "+((f.countGuess||0)>4?'Reels Growth':'Reels Starter')+" by the video count picked"};
+ }
+ if(mo==='monthly') return {id:'content-engine',why:"No specific project type matched → defaulted to Content Engine as the closest ongoing package"};
+ if(f.film) return {id:'reel-day',why:"No specific project type matched → defaulted to Reel Day as the closest one-time package"};
+ return {id:null,why:"No package matched what was picked → used the custom estimate instead"};
+}
+
+function suggestFromForm(raw,R){
+ const get=(k)=>raw[k]instanceof Array?raw[k]:(raw[k]?[raw[k]]:[]);
+ const one=(k)=>{const a=get(k);return a.length?a[0]:'';};
+ const need=get('need'), ptypes=get('ptype'), platformsSel=get('platforms'), extras=get('extras');
+ const film=need.includes('Filming only')||need.includes('Filming + editing');
+ const edit=need.includes('Editing only (I have footage)')||need.includes('Filming + editing');
+ const manage=need.includes('Social media management');
+ const marketing=one('marketing');
+ const ads=need.includes('Targeted ads & marketing')||marketing==='Yes, include targeted ads + metrics';
+ const term=one('term'); const mode=term==='One-time project'?'once':(term==='Ongoing / monthly'?'monthly':(manage||ptypes.includes('Social media content')?'monthly':'once'));
+ const countLabel=one('count'); const countGuess=countLabel in COUNT_MAP?COUNT_MAP[countLabel]:null;
+ const who=one('who'); const clientType=WHO_MAP[who]||'other';
+ const whereSel=one('where'); const cityOther=(raw.city_other||'').trim();
+ const inFive=METROS.includes(whereSel);
+ const loc=inFive?whereSel:(whereSel?'Somewhere else':METROS[0]);
+ const travel=inFive||!whereSel?0:R.travel.other;
+ const budgetLabel=one('budget'); const budget=BUDGET_MAP[budgetLabel]||'';
+ const platObj={}; SOCIAL_PLATFORMS.forEach(p=>platObj[p]=platformsSel.includes(p));
+ const pc=Math.max(1,SOCIAL_PLATFORMS.filter(p=>platObj[p]).length);
+ const f={film,edit,manage,ads,mode,ptypes,who,countGuess};
+ const pkgPick=pickPackage(f);
+
+ const S=makeState(R);
+ Object.assign(S,{tab:'custom',clientType,budget,loc,travel,mode,type:(PTYPE_MAP[ptypes[0]]||(manage?'social':'other')),
+  film,edit,manage,ads,platforms:platObj,adSpend:ads?1500:0,
+  shoots:film?(SHOOTS_MAP[countLabel]||1):0,hours:4,crew:0,drone:extras.includes('Drone')&&film?1:0,
+  subs:extras.includes('Captions & subtitles'),photos:extras.includes('Photos & graphics')?1:0,calls:extras.includes('Strategy calls')?1:0,
+  rush:extras.includes('Rush turnaround'),pick:'target'});
+ const reelShare=countGuess==null?6:Math.round(countGuess*0.7);
+ S.nReel=reelShare; S.nStd=countGuess==null?2:Math.max(0,countGuess-reelShare); S.nLong=0; S.nFeature=0;
+
+ let pkgResult=null;
+ if(!film&&!edit&&!manage&&!ads){ pkgPick.id='content-engine'; pkgPick.why="Nothing specific was picked → showing the Content Engine package as a rough starting point. Call or email them for details before quoting."; }
+ if(pkgPick.id){
+  const pS=makeState(R); Object.assign(pS,{clientType,loc,travel,pkg:pkgPick.id,pkgMgmt:(manage?'full':'none'),pkgPlat:pc,pkgRush:extras.includes('Rush turnaround')&&PKG_BY_ID[pkgPick.id].mode!=='monthly',pick:'target'});
+  pkgResult={state:pS,res:calcTier(pS,R,'target'),why:pkgPick.why,pkg:PKG_BY_ID[pkgPick.id]};
+ }
+ const customResult={state:S,res:calcTier(S,R,'target')};
+ return {pkgResult,customResult,facts:{need,ptypes,term,mode,countLabel,countGuess,who,clientType,whereSel,cityOther,inFive,travel,marketing,ads,platformsSel,pc,extras,budgetLabel,budget,start:one('start')}};
+}
+const GEN_URL='https://claude.ai/artifact/5Xw4rrR7ZBDEjKGZ2zsFMM';
+function fmtList(items){ return items.length?items.join(', '):'—'; }
+function tierLine(res){ const parts=[]; if(res.once>0)parts.push(money(res.once)+' one-time'); if(res.rec>0)parts.push(money(res.rec)+'/mo'); return parts.join(' + ')||'—'; }
+function tiers3(S,R){ return ['low','target','high'].map(k=>PICKS[k]+': '+tierLine(calcTier(S,R,k))).join('  ·  '); }
+
+function buildReport(name,email,raw,R){
+ const {pkgResult,customResult,facts}=suggestFromForm(raw,R);
+ const primary=pkgResult||customResult;
+ const lines=(r)=>r.lines.map(l=>'- '+l.label+(l.detail?' ('+l.detail+')':'')+': '+money(l.amt)+(l.rec?'/mo':'')).join('\n');
+ const contents=(r)=>(r.contents||[]).map(c=>(/:$/.test(c)?c:'- '+c)).join('\n');
+
+ const why=[];
+ why.push('Services picked: '+fmtList(facts.need)+' -> filming '+(customResult.state.film?'yes':'no')+', editing '+(customResult.state.edit?'yes':'no')+', management '+(customResult.state.manage?'yes':'no')+', ads '+(customResult.state.ads?'yes':'no'));
+ why.push('Project type(s): '+fmtList(facts.ptypes)+(pkgResult?' -> '+pkgResult.why:' -> used "'+TYPES[customResult.state.type]+'" pricing in the custom estimate'));
+ const actualMode=(pkgResult?pkgResult.pkg.mode:customResult.state.mode);
+ why.push('Ongoing or one-time: '+(facts.term||'not answered')+' -> priced as '+(actualMode==='monthly'?'ongoing, monthly':'one-time')+(facts.term?(actualMode!==facts.mode?' (switched to match the suggested package)':''):' (not answered, assumed from the other answers)'));
+ if(customResult.state.edit) why.push('Videos: '+(facts.countLabel||'not answered')+' -> used about '+(facts.countGuess==null?'6 reels and 2 longer videos (a guess, since this was not answered)':customResult.state.nReel+' Reels and '+customResult.state.nStd+' standard videos')+' in the custom estimate');
+ why.push('Client type: '+(facts.who||'not answered')+' -> '+CLIENTS[customResult.state.clientType]+(R.clientMult[customResult.state.clientType]!==1?' ('+(R.clientMult[customResult.state.clientType]<1?'-':'+')+Math.round(Math.abs(1-R.clientMult[customResult.state.clientType])*100)+'% rate)':', standard rate'));
+ if(customResult.state.film) why.push('Filming location: '+(facts.whereSel?(facts.inFive?facts.whereSel+' -> no travel charge':(facts.cityOther||'outside the 5 metros')+' -> added a '+money(facts.travel)+' travel estimate (confirm the real cost)'):'not answered -> assumed Dallas–Fort Worth'));
+ why.push('Marketing layer: '+(facts.marketing||'not answered')+(facts.ads?' -> ads management included, using a $1,500/mo ad-spend placeholder since the form does not ask for one (confirm their real budget)':' -> not included'));
+ if(customResult.state.manage) why.push('Platforms: '+fmtList(facts.platformsSel)+' -> '+facts.pc+' platform(s) priced for management');
+ if(facts.extras.length) why.push('Extras picked: '+fmtList(facts.extras));
+ why.push('Budget selected: '+(facts.budgetLabel||'not answered'));
+ if(facts.start==='As soon as possible') why.push('Start: as soon as possible — they may expect the rush option');
+
+ const fit=facts.budget?fitFor(customResult.state,primary.res,R):null;
+
+ const out={};
+ out['_subject']='Suggested quote for '+(name||'a new lead');
+ out['Lead']=name+' <'+email+'>';
+ out['1. Suggested price (Standard)']=tierLine(primary.res)+(pkgResult?'  —  '+pkgResult.pkg.name:'  —  custom estimate');
+ out['2. Lean / Standard / Premium']=tiers3(primary.state,R);
+ if(fit) out['3. Fits their stated budget?']=fit.text;
+ out['4. What to offer']=contents(primary.res)||'(nothing priced — check their answers, something may be missing)';
+ out['5. Price breakdown']=lines(primary.res);
+ if(pkgResult && customResult.res.lines.length){
+  out['6. Cross-check: built from their exact answers instead']=tierLine(customResult.res)+'\n'+lines(customResult.res);
+ }
+ out['7. Why this number']=why.map(w=>'- '+w).join('\n');
+ out['8. Terms to offer']=termsList(primary.res,R).join('\n');
+ out['9. Adjust it yourself']='Open the quote generator to change rates, pick a different package or tier, and copy a client-ready message: '+GEN_URL;
+ out['10. Note']='Automated suggestion to save you a step — sanity-check before replying. Their full form answers are in the separate email you already get for this submission.';
+ return out;
+}
+
+ return { buildReport: function(name,email,raw){ const R=JSON.parse(JSON.stringify(DEFAULTS)); return buildReport(name,email,raw,R); } };
+})();
+
 (function(){
   const qf = document.getElementById('qf'), form = document.getElementById('quoteForm');
   const steps = [...form.querySelectorAll('.qs')];
@@ -1033,6 +1369,27 @@ const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
       'Notes': (fd.get('message') || '').trim() || '-'
     };
   }
+  function collectRaw(){
+    const fd = new FormData(form);
+    return {
+      need: fd.getAll('need'), ptype: fd.getAll('ptype'), term: fd.get('term') || '', count: fd.get('count') || '',
+      where: fd.get('where') || '', city_other: fd.get('city_other') || '', marketing: fd.get('marketing') || '',
+      platforms: fd.getAll('platforms'), who: fd.get('who') || '', extras: fd.getAll('extras'),
+      start: fd.get('start') || '', budget: fd.get('budget') || ''
+    };
+  }
+  /* Suggested-quote email: run the same answers through the pricing engine and
+     send a second, separate message with a suggested price and the reasoning
+     behind it. Fire-and-forget — if anything here fails, the client's own
+     confirmation and the raw-answers email are completely unaffected. */
+  function sendSuggestedQuote(data){
+    if(!QUOTE_ENDPOINT) return;
+    try{
+      const report = CCQuote.buildReport(data['Name'], data['Email'], collectRaw());
+      fetch(QUOTE_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body: JSON.stringify(report)}).catch(()=>{});
+    }catch(e){ /* never let a pricing hiccup touch the visitor's experience */ }
+  }
   /* Calendly: after the quote is sent, offer a call right on the confirmation screen.
      Name, email and project notes are prefilled so they only pick a time. */
   const CAL_URL = 'https://calendly.com/crystalcityprod/30min';
@@ -1085,6 +1442,7 @@ const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
           body: JSON.stringify(Object.assign({_subject: 'New quote request: ' + data['Name']}, data))});
         if(!r.ok) throw new Error(r.status);
         finish('sent', data['Email'], data);
+        sendSuggestedQuote(data);
       }catch(x){
         err.textContent = 'That did not go through. Please try again, or email us at ' + QUOTE_EMAIL + '.';
         submit.disabled = false; label.textContent = 'Request My Quote';

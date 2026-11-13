@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book a Call | Crystal City Productions</title>
+<meta name="description" content="Book a free 30-minute call with Crystal City Productions to talk through your video, editing or social media project.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://crystalcityprod.com/call/">
+<meta property="og:title" content="Book a Call | Crystal City Productions">
+<meta property="og:description" content="Pick a time and we'll walk through your project together.">
+<meta property="og:image" content="https://crystalcityprod.com/assets/logo.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://crystalcityprod.com/call/">
+<meta name="theme-color" content="#08080A">
+<link rel="icon" href="../assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://assets.calendly.com/assets/external/widget.css">
+<style>
+:root{
+  --ink:        #08080A;
+  --ink-2:      #0C0C0F;
+  --ink-line:   rgba(233,188,83,.16);
+  --ink-line-2: rgba(255,255,255,.07);
+  --gold:       #E9BC53;
+  --gold-lit:   #F7D07A;
+  --gold-deep:  #A87B2C;
+  --paper:      #F3EFE6;
+  --mute:       rgba(243,239,230,.58);
+  --mute-2:     rgba(243,239,230,.38);
+  --display:    "Jost","Futura","Avenir Next","Century Gothic",sans-serif;
+  --ease:       cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:linear-gradient(180deg,var(--ink),var(--ink-2) 42%,var(--ink));
+  color:var(--paper); font-family:var(--display); font-weight:300;
+  min-height:100vh; display:flex; flex-direction:column;
+}
+a{color:var(--gold); text-decoration:none}
+header{
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  padding:clamp(22px,4vw,34px) 20px 0;
+}
+header img{height:28px; width:auto; opacity:.95}
+header span{font-size:13px; letter-spacing:.28em; text-transform:uppercase; color:var(--paper)}
+main{flex:1; display:flex; justify-content:center; padding:clamp(18px,4vw,36px) 20px 60px}
+.wrap{width:100%; max-width:900px; text-align:center}
+.eyebrow{
+  display:inline-block; font-size:11px; letter-spacing:.3em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:16px;
+}
+h1{
+  font-weight:200; font-size:clamp(30px,4.6vw,48px); line-height:1.12; margin:0 0 14px;
+  letter-spacing:-.01em;
+}
+p.lede{
+  font-size:15px; color:var(--mute); max-width:480px; margin:0 auto clamp(30px,4vw,44px);
+  line-height:1.6;
+}
+.panel{
+  position:relative; border:1px solid var(--ink-line);
+  background:linear-gradient(175deg,#101014,#0A0A0C);
+  padding:clamp(4px,1.4vw,14px); box-shadow:0 60px 120px -70px rgba(233,188,83,.35);
+}
+.panel .cnr{position:absolute; width:18px; height:18px; border:1px solid var(--gold); opacity:.7; pointer-events:none}
+.panel .cnr.tl{top:-1px; left:-1px; border-right:0; border-bottom:0}
+.panel .cnr.tr{top:-1px; right:-1px; border-left:0; border-bottom:0}
+.panel .cnr.bl{bottom:-1px; left:-1px; border-right:0; border-top:0}
+.panel .cnr.br{bottom:-1px; right:-1px; border-left:0; border-top:0}
+.cal{min-width:280px; height:720px}
+.alt{font-size:12px; letter-spacing:.04em; color:var(--mute-2); margin:18px 0 0}
+footer{
+  text-align:center; padding:0 20px clamp(26px,4vw,40px); font-size:11.5px;
+  letter-spacing:.04em; color:var(--mute-2);
+}
+footer a{border-bottom:1px solid var(--ink-line)}
+@media(max-width:700px){.cal{height:800px}}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="https://crystalcityprod.com/" aria-label="Crystal City Productions home" style="display:inline-flex; align-items:center; gap:10px">
+    <img src="../assets/logo-transparent.png" alt="Crystal City Productions">
+    <span>Crystal City Productions</span>
+  </a>
+</header>
+
+<main>
+  <div class="wrap">
+    <span class="eyebrow">30-Minute Call</span>
+    <h1>Let&rsquo;s talk about your project.</h1>
+    <p class="lede">Pick a time that works and we&rsquo;ll walk through what you need &mdash; filming, editing, social media or all three &mdash; so you leave with a clear next step.</p>
+    <div class="panel">
+      <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+      <div class="cal" id="cal"></div>
+    </div>
+    <p class="alt">Calendar not loading? <a href="https://calendly.com/crystalcityprod/30min" target="_blank" rel="noopener">Open it in a new tab</a>.</p>
+  </div>
+</main>
+
+<footer>
+  <a href="mailto:crystalcityprod@gmail.com">crystalcityprod@gmail.com</a> &middot; <a href="https://crystalcityprod.com/">crystalcityprod.com</a>
+</footer>
+
+<script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+<script>
+window.addEventListener('load', function(){
+  if(window.Calendly){
+    Calendly.initInlineWidget({
+      url: 'https://calendly.com/crystalcityprod/30min?hide_gdpr_banner=1&background_color=0a0a0c&text_color=f3efe6&primary_color=e9bc53',
+      parentElement: document.getElementById('cal')
+    });
+  }
+});
+</script>
+</body>
+</html>

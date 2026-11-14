@@ -118,7 +118,7 @@ section{position:relative}
   content:""; position:absolute; inset:0; background:linear-gradient(100deg,var(--gold-deep),var(--gold-lit) 50%,var(--gold-deep));
   transform:translateY(101%); transition:transform .5s var(--ease); z-index:-1;
 }
-.btn span{position:relative; z-index:1}
+.btn span{position:relative; z-index:1; margin-right:-.26em} /* cancels the trailing letter-space so the visible words sit dead centre */
 .btn:hover{color:#0A0A0A}
 .btn:hover::before{transform:translateY(0)}
 .btn.solid{background:linear-gradient(100deg,var(--gold-deep),var(--gold-lit) 50%,var(--gold-deep)); color:#0A0A0A; border-color:transparent}
@@ -148,7 +148,7 @@ header.nav.stuck{
 .brand:hover img{transform:rotate(-4deg) scale(1.06)}
 .brand-txt{line-height:1.05}
 .brand-txt b{display:block; font-family:var(--sans); font-weight:400; font-size:13.5px; letter-spacing:.3em; text-transform:uppercase}
-.brand-txt i{display:block; font-style:normal; font-size:8.5px; letter-spacing:.44em; text-transform:uppercase; color:var(--gold); margin-top:3px}
+.brand-txt i{display:block; font-style:normal; font-size:8.5px; letter-spacing:.44em; text-transform:uppercase; color:var(--gold); margin-top:3px; padding-left:.14em}
 .nav-links{display:flex; align-items:center; gap:36px}
 .nav-links a{
   font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--mute);
@@ -676,7 +676,7 @@ html body .w-cap b{font-size:clamp(13px,1.35vw,19px)!important}
         {"@type":"Question","name":"Am I locked into a contract?","acceptedAnswer":{"@type":"Answer","text":"No. Monthly work is month-to-month, with 14 days' notice to pause or cancel. One-off projects are scoped and agreed up front."}},
         {"@type":"Question","name":"Where do you shoot, and can you come to me?","acceptedAnswer":{"@type":"Answer","text":"We have crews in Dallas\u2013Fort Worth, Miami, Chicago, New York and Los Angeles, with no travel charge in those metros. Anywhere else, we fly out or direct a vetted local crew, and our editors handle post either way. Travel is quoted per project."}},
         {"@type":"Question","name":"Who owns the footage and the final videos?","acceptedAnswer":{"@type":"Answer","text":"You do. You get full commercial rights to everything we produce for you, plus the raw files on request. We only ask permission to feature work in our portfolio."}},
-        {"@type":"Question","name":"How do payments work?","acceptedAnswer":{"@type":"Answer","text":"Monthly clients are billed on the same date each month. One-off projects are 50% to book and 50% on delivery, invoiced directly."}}
+        {"@type":"Question","name":"How do payments work?","acceptedAnswer":{"@type":"Answer","text":"Monthly clients are billed on the same date each month. One-off projects are 50% to book (you can pay the deposit securely online from your quote) and 50% before final delivery."}}
       ]
     }
   ]
@@ -913,7 +913,7 @@ html body .w-cap b{font-size:clamp(13px,1.35vw,19px)!important}
       <details><summary>Who owns the footage and the final videos?</summary>
         <div class="ans">You do. You get full commercial rights to everything we produce for you, plus the raw files on request. We only ask permission to feature work in our portfolio.</div></details>
       <details><summary>How do payments work?</summary>
-        <div class="ans">Monthly clients are billed on the same date each month. One-off projects are 50% to book and 50% on delivery, invoiced directly.</div></details>
+        <div class="ans">Monthly clients are billed on the same date each month. One-off projects are 50% to book (you can pay the deposit securely online from your quote) and 50% before final delivery.</div></details>
     </div>
   </div>
 </section>
@@ -1313,7 +1313,7 @@ function suggestFromForm(raw,R){
  const travel=inFive||!whereSel?0:R.travel.other;
  const budgetLabel=one('budget'); const budget=BUDGET_MAP[budgetLabel]||'';
  const platObj={}; SOCIAL_PLATFORMS.forEach(p=>platObj[p]=platformsSel.includes('None - I will post myself')?false:platformsSel.includes(p));
- const selfPost=platformsSel.includes('None - I will post myself'); const pc=selfPost?0:Math.max(1,SOCIAL_PLATFORMS.filter(p=>platObj[p]).length);
+ const selfPost=platformsSel.includes('None - I will post myself'); if(!selfPost&&!SOCIAL_PLATFORMS.some(p=>platObj[p])) platObj.Instagram=true; const pc=selfPost?0:Math.max(1,SOCIAL_PLATFORMS.filter(p=>platObj[p]).length);
  const f={film,edit,manage,ads,mode,ptypes,who,countGuess};
  const pkgPick=pickPackage(f);
 
@@ -1400,6 +1400,7 @@ function buildReport(name,email,raw,R){
    let pay=null;
    if(sf.pkgResult && res.lines.length===1){ const pk=sf.pkgResult.pkg, l=res.lines[0], rec=pk.mode==='monthly';
     if(l.label===pk.name && l.amt===R.pkg[pk.id]) pay={id:pk.id, rec:rec, cents:Math.round(l.amt*100*(rec?1:R.deposit))}; }
+   if(!pay && res.rec<=0 && res.once>0){ const dep=Math.round(res.once*R.deposit/5)*5; if(dep>=100&&dep<=10000) pay={id:'custom', rec:false, cents:dep*100, custom:true}; }
    return {title:res.title, headline:head, range:(lo&&hi&&lo!==hi)?[lo,hi]:null, contents:res.contents||[], text:text, pay:pay};
   }catch(e){ return null; }
  } };
@@ -1498,7 +1499,7 @@ function buildReport(name,email,raw,R){
      client-safe quote (no profit math, no internal notes) plus the secure pay link when one applies. */
   function payUrlFor(cq, email){
     const pk = cq && cq.pay && PAY_LINKS[cq.pay.id];
-    if(!pk || pk.amount !== cq.pay.cents) return '';
+    if(!pk || (!cq.pay.custom && pk.amount !== cq.pay.cents)) return '';
     let href = pk.url; const em = String(email || '').trim();
     if(em) href += (href.indexOf('?') > -1 ? '&' : '?') + 'prefilled_email=' + encodeURIComponent(em);
     return href;
@@ -1511,8 +1512,10 @@ function buildReport(name,email,raw,R){
       let text = cq.text;
       const href = payUrlFor(cq, data['Email']);
       if(href){
-        const amt = '$' + (PAY_LINKS[cq.pay.id].amount / 100).toLocaleString('en-US');
-        const block = cq.pay.rec
+        const amt = '$' + ((cq.pay.custom ? cq.pay.cents : PAY_LINKS[cq.pay.id].amount) / 100).toLocaleString('en-US');
+        const block = cq.pay.custom
+          ? 'READY TO BOOK?\nPay your 50% deposit securely with Stripe: ' + href + '\nWhen the page asks for an amount, enter exactly ' + amt + '. The remaining balance is due before final delivery.\n\n'
+          : cq.pay.rec
           ? 'READY TO START?\nSubscribe securely with Stripe: ' + href + '\nToday you pay ' + amt + ' for your first month. Your plan then renews every month on the same date until you cancel (14 days\u2019 notice to pause or cancel).\n\n'
           : 'READY TO BOOK?\nPay your 50% deposit (' + amt + ') securely with Stripe: ' + href + '\nThe remaining balance is due before final delivery.\n\n';
         const k = text.lastIndexOf('This is a suggested quote based on your answers.');
@@ -1544,7 +1547,8 @@ function buildReport(name,email,raw,R){
     'real-estate': {url:'https://buy.stripe.com/28EdR97eqbNVfab1ly57W0h', amount:305000},
     'community': {url:'https://buy.stripe.com/14A4gz6amcRZ5zB1ly57W0i', amount:240000},
     'reel-day': {url:'https://book.stripe.com/fZueVd0Q25pxd231ly57W06', amount:67500},
-    'listing': {url:'https://book.stripe.com/14AfZheGS7xF5zB1ly57W07', amount:50000},
+    'listing': {url:'https://book.stripe.com/28E3cvaqC7xF8LN8O057W0j', amount:45000},
+    'custom': {url:'https://book.stripe.com/fZucN5gP0aJR6DF9S457W0k', amount:0},
     'event-highlight': {url:'https://book.stripe.com/5kQ8wP1U605d2npfco57W08', amount:62500},
     'spot': {url:'https://book.stripe.com/bJe4gz0Q23hp6DF6FS57W09', amount:125000},
     'campaign': {url:'https://book.stripe.com/8x26oHaqCg4b9PR7JW57W0a', amount:260000},
@@ -1596,14 +1600,14 @@ function buildReport(name,email,raw,R){
     add('p', 'qq-fine', 'Your full breakdown and terms are in the email we\u2019re sending you. We\u2019ll confirm the scope and final pricing with you within one business day.');
     const payBox = add('div', 'qq-pay');
     const pk = cq.pay && PAY_LINKS[cq.pay.id];
-    if(pk && pk.amount === cq.pay.cents){
+    if(pk && (cq.pay.custom || pk.amount === cq.pay.cents)){
       let href = pk.url;
       const em = String(data['Email'] || '').trim();
       if(em) href += (href.indexOf('?') > -1 ? '&' : '?') + 'prefilled_email=' + encodeURIComponent(em);
-      const amt = '$' + (pk.amount / 100).toLocaleString('en-US');
+      const amt = '$' + ((cq.pay.custom ? cq.pay.cents : pk.amount) / 100).toLocaleString('en-US');
       const a = add('a', 'btn solid', null, payBox); a.href = href; a.rel = 'noopener';
       add('span', '', cq.pay.rec ? 'Subscribe: ' + amt + ' first month' : 'Pay ' + amt + ' deposit to book', a);
-      add('p', '', cq.pay.rec ? 'Secure checkout by Stripe. You pay your first month today, then your plan renews monthly until you cancel.' : 'Secure checkout by Stripe. The deposit is 50% of the quote.', payBox);
+      add('p', '', cq.pay.rec ? 'Secure checkout by Stripe. You pay your first month today, then your plan renews monthly until you cancel.' : (cq.pay.custom ? 'Secure checkout by Stripe. The deposit is 50% of the quote. When the page asks for an amount, enter exactly ' + amt + '.' : 'Secure checkout by Stripe. The deposit is 50% of the quote.'), payBox);
     } else {
       const a = add('a', 'btn', null, payBox); a.href = '/call';
       add('span', '', 'Book a call', a);

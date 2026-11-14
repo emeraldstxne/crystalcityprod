@@ -610,28 +610,6 @@ html body .w-cap b{font-size:clamp(13px,1.35vw,19px)!important}
 .w-item.full .w-frame video,.w-item.half .w-frame video,.w-item.wide .w-frame video{object-fit:contain}
 @media (max-width:700px){.w-item.full .w-frame:has(video),.w-item.half .w-frame:has(video),.w-item.wide .w-frame:has(video){aspect-ratio:16/9}}
 @media (max-width:860px){html body h2{font-size:clamp(20px,6.4vw,43px)!important} html body .kind-grid div{font-size:clamp(10.5px,3vw,13.5px)!important}}
-
-/* ===== client-facing suggested quote (confirmation screen) ===== */
-.qf-quote{margin:clamp(26px,3.4vw,40px) auto 0; max-width:680px; text-align:left; padding:clamp(22px,3vw,34px); background:var(--ink-3); border:1px solid var(--ink-line)}
-.qf-quote .eyebrow{display:block; text-align:center; margin-bottom:10px}
-.qf-quote h4{font-family:var(--display); font-weight:200; font-size:clamp(20px,2.4vw,26px); margin:0 0 14px; text-align:center}
-.qf-quote .qq-price{font-family:var(--display); font-weight:200; font-size:clamp(38px,6vw,56px); line-height:1.05; text-align:center; color:var(--gold-lit); letter-spacing:-.01em}
-.qf-quote .qq-range{text-align:center; color:var(--mute); font-size:13.5px; margin:8px auto 0; max-width:none}
-.qf-quote h5{font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--gold); font-weight:500; margin:26px 0 10px}
-.qf-quote ul{list-style:none; margin:0; padding:0; color:var(--mute); font-size:14.5px}
-.qf-quote li{padding:5px 0 5px 18px; position:relative}
-.qf-quote li::before{content:""; position:absolute; left:0; top:13px; width:6px; height:6px; border:1px solid var(--gold); transform:rotate(45deg)}
-.qf-quote li.h{padding-left:0; color:var(--paper); margin-top:8px}
-.qf-quote li.h::before{display:none}
-.qf-quote table{width:100%; border-collapse:collapse; font-size:14.5px}
-.qf-quote td{padding:10px 0; border-top:1px solid var(--ink-line-2); vertical-align:top}
-.qf-quote td:last-child{text-align:right; white-space:nowrap; padding-left:14px; color:var(--paper)}
-.qf-quote td span{display:block}
-.qf-quote td .qq-d{color:var(--mute-2); font-size:12.5px; margin-top:2px}
-.qf-quote tr.neg td:last-child{color:var(--gold)}
-.qf-quote .qq-tot{display:flex; justify-content:space-between; gap:12px; padding:12px 0 0; border-top:1px solid var(--ink-line); font-size:15.5px; color:var(--paper)}
-.qf-quote p{max-width:none; margin:6px 0; font-size:13.5px; color:var(--mute); text-align:left}
-.qf-quote .qq-fine{margin-top:20px; font-size:12.5px; color:var(--mute-2)}
 </style>
 <script type="application/ld+json">
 {
@@ -878,11 +856,10 @@ html body .w-cap b{font-size:clamp(13px,1.35vw,19px)!important}
         <div class="mark"></div>
         <h3>Request received.</h3>
         <p id="qfDoneMsg" class="lede" style="margin:14px auto 0"></p>
-        <div class="qf-quote" id="qfQuote" hidden></div>
         <div class="qf-book" id="qfBook" hidden>
           <span class="eyebrow center" id="qfBookEye">Want to move faster?</span>
           <h4 id="qfBookTitle">Book a 30-minute call.</h4>
-          <p>Pick a time that works and we&rsquo;ll walk through your answers together, so we can lock in your final quote together.</p>
+          <p>Pick a time that works and we&rsquo;ll walk through your answers together, so your quote is dialed in before it lands in your inbox.</p>
           <div class="qf-cal" id="qfCal"></div>
           <p class="qf-book-alt">Calendar not loading? <a href="https://calendly.com/crystalcityprod/30min" target="_blank" rel="noopener">Open it in a new tab</a>.</p>
         </div>
@@ -1001,9 +978,9 @@ const PLATFORMS=['Instagram','TikTok','YouTube','Facebook','LinkedIn'];
 const PKGS=[
  {id:'reels-starter',cost:[0,4,0],name:'Reels Starter',mode:'monthly',price:750,shoot:false,items:['4 edited Reels a month from the client’s footage','Captions, music and cover frames','Monthly content calendar','Captions written and posts scheduled on 1 platform']},
  {id:'reels-growth',cost:[0,8,0],name:'Reels Growth',mode:'monthly',price:1400,shoot:false,items:['8 edited Reels a month from the client’s footage','2 carousels or graphics a month','Captions, music and cover frames','Content calendar and a monthly check-in call','Captions written and posts scheduled on 1 platform']},
- {id:'content-engine',cost:[1,12,2],name:'Content Engine',mode:'monthly',price:2600,shoot:true,items:['1 half-day shoot a month (up to 4 hrs)','12 Reels and 2 mid-length videos (1–3 min)','Color, sound and captions','Captions written and posts scheduled on 1 platform','Monthly strategy call and content calendar']},
+ {id:'content-engine',cost:[1,12,2],name:'Content Engine',mode:'monthly',price:2600,shoot:true,items:['{VISITS}','12 Reels and 2 mid-length videos (1–3 min)','Color, sound and captions','Captions written and posts scheduled on 1 platform','Monthly strategy call and content calendar']},
  {id:'content-ads',cost:[1,12,2],name:'Content + Ads',mode:'monthly',price:3500,shoot:true,items:['Everything in Content Engine','Targeted ads on up to $3,000 a month of ad spend','Monthly report: reach, clicks, leads, cost per result']},
- {id:'real-estate',cost:[3,6,3],name:'Real Estate Retainer',mode:'monthly',price:3050,shoot:true,items:['3 listing videos a month (2–3 min each)','6 Reels cut from the listing footage','Drone footage on every listing','Captions and music','Captions written and posts scheduled on 1 platform']},
+ {id:'real-estate',noVisits:true,cost:[3,6,3],name:'Real Estate Retainer',mode:'monthly',price:3050,shoot:true,items:['3 listing videos a month (2–3 min each)','6 Reels cut from the listing footage','Drone footage on every listing','Captions and music','Captions written and posts scheduled on 1 platform']},
  {id:'community',cost:[2,8,1],name:'Nonprofit & Community Media',mode:'monthly',price:2400,shoot:true,noDiscount:true,items:['2 events, programs or talks covered a month (up to 4 hrs each)','8 Reels from events and talks','1 recap video (1–3 min)','Weekly content calendar','Captions written and posts scheduled on 1 platform']},
  {id:'reel-day',cost:[1,4,0],name:'Reel Day',mode:'once',price:1350,shoot:true,items:['Half-day shoot (up to 4 hrs)','4 edited Reels','Captions, music and color']},
  {id:'listing',cost:[1,1,1],name:'Listing Video',mode:'once',price:1000,shoot:true,items:['One property, 2–3 min tour','Drone footage','1 Reel cut from the same shoot','Captions and music']},
@@ -1021,7 +998,7 @@ const PKG_BY_ID=Object.fromEntries(PKGS.map(p=>[p.id,p]));
 
 const DEFAULTS={
  shoot:{mini:550,half:850,full:1500,extraHour:175,crewHalf:400,crewFull:550},
- edit:{reel:150,std:400,long:750,feature:1800},
+ edit:{reel:150,singleReel:300,std:400,long:750,feature:1800},
  volume:{v5:.10,v13:.15,v21:.20},
  typeShoot:{commercial:1.8,realestate:.65,event:1,shortfilm:1.5,documentary:1.2,musicvideo:1.2,social:.8,other:1},
  typeEdit:{commercial:1.3,realestate:.85,event:1,shortfilm:1.4,documentary:1.6,musicvideo:1.25,social:1,other:1},
@@ -1032,7 +1009,9 @@ const DEFAULTS={
  travel:{other:1500},
  clientMult:{local:1,realestate:1,religious:.9,creator:.95,brand:1.15,other:1},
  cost:{shooter:250,shooterAway:300,reel:50,big:200,fee:.03,warn:.35},
+ visits:{minPrice:2600,max:4,hours:2},
  minProject:750,
+ minEdit:300,
  pkgExtraReel:150,
  spread:{low:.90,high:1.15,floor:.85},
  deposit:.5,
@@ -1045,14 +1024,14 @@ function makeState(R){return {
  mode:'monthly',type:'social',film:true,edit:true,manage:false,ads:false,
  shoots:1,hours:4,crew:0,drone:0,nReel:8,nStd:2,nLong:0,nFeature:0,subs:false,
  platforms:{Instagram:true,TikTok:true},adSpend:1500,photos:0,calls:0,rush:false,
- mgmtLevel:'essential',cur:3000,goal:10000,longGoal:25000,monthsLeft:24,pick:'target',pkg:'content-engine',pkgReels:0,pkgMgmt:'none',pkgPlat:1,pkgRush:false,out:'quote'};}
+ mgmtLevel:'essential',cur:3000,goal:10000,longGoal:25000,monthsLeft:24,pick:'target',pkg:'content-engine',pkgReels:0,pkgMgmt:'none',pkgPlat:1,pkgVisits:0,pkgRush:false,out:'quote'};}
 
 const r5=x=>Math.round(x/5)*5;
 const r25=x=>Math.round(x/25)*25;
 function money(n){const v=Math.round(n);return (v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US');}
 function pctText(x){return Math.round(x*100)+'%';}
 function shootPrice(h,R){ if(h<=2)return R.shoot.mini; if(h<=4)return R.shoot.half; if(h<=8)return R.shoot.full; return R.shoot.full+(h-8)*R.shoot.extraHour; }
-function volumePct(n,R){ return n>=21?R.volume.v21:n>=13?R.volume.v13:n>=5?R.volume.v5:0; }
+function volumePct(n,R){ if(n<5)return 0; const c=(a,b)=>Math.max(0,Math.min(n,b)-a); return (c(4,12)*R.volume.v5+c(12,20)*R.volume.v13+c(20,Infinity)*R.volume.v21)/n; }
 function plural(n,w){return n+' '+w+(n===1?'':'s');}
 const inMetro=S=>METROS.includes(S.loc);
 
@@ -1064,7 +1043,8 @@ function finish(L,extra){
 
 function adjustLines(L,S,R,add){
  const mult=R.clientMult[S.clientType]; if(!mult||mult===1)return;
- const label=(mult<1?'Community / client rate':'Brand / corporate rate')+' ('+(mult<1?'−':'+')+Math.round(Math.abs(1-mult)*100)+'%)';
+ if(mult>1){ for(const l of L){ if(l.fee)l.amt=r5(l.amt*mult); } return; }
+ const label='Community / client rate (−'+Math.round((1-mult)*100)+'%)';
  let so=0,sr=0; for(const l of L){ if(l.fee){ if(l.rec)sr+=l.amt; else so+=l.amt; } }
  if(so)add(label,'',so*(mult-1),false,false);
  if(sr)add(label,'',sr*(mult-1),true,false);
@@ -1074,6 +1054,7 @@ function calcCustom(S,R){
  const L=[]; const rec=S.mode==='monthly'; const t=S.type; let mgmtItems=null;
  const add=(label,detail,amt,recFlag,fee=true)=>{ const a=r5(amt); if(a!==0)L.push({label,detail,amt:a,rec:recFlag,fee}); return a; };
  let prod=0, nVid=0;
+ const reelsOnly=S.edit&&!S.film&&S.nReel>0&&!S.nStd&&!S.nLong&&!S.nFeature;
  if(S.film&&S.shoots>0){
   prod+=add('Filming',plural(S.shoots,'shoot')+', '+S.hours+' hrs each',shootPrice(S.hours,R)*R.typeShoot[t]*S.shoots,rec);
   if(S.crew>0)prod+=add('Added crew',plural(S.crew,'crew member')+' on '+plural(S.shoots,'shoot'),S.crew*S.shoots*(S.hours<=4?R.shoot.crewHalf:R.shoot.crewFull),rec);
@@ -1082,11 +1063,11 @@ function calcCustom(S,R){
  if(S.edit){
   const items=[['reel',S.nReel,'Reel'],['std',S.nStd,'standard video'],['long',S.nLong,'long-form video'],['feature',S.nFeature,'feature cut']];
   let gross=0; const parts=[];
-  for(const [k,q,lab] of items){ if(q>0){ gross+=q*R.edit[k]*R.typeEdit[t]; nVid+=q; parts.push(plural(q,lab)); } }
+  for(const [k,q,lab] of items){ if(q>0){ gross+=(k==='reel'?R.edit.singleReel+(q-1)*R.edit.reel:q*R.edit[k])*R.typeEdit[t]; nVid+=q; parts.push(plural(q,lab)); } }
   if(nVid>0){
    prod+=add('Editing, color and sound',parts.join(', '),gross,rec);
    const pct=volumePct(nVid,R);
-   if(pct>0)prod+=add('Volume discount',nVid+' videos, '+pctText(pct)+' off editing',-gross*pct,rec,true);
+   if(pct>0)prod+=add('Volume discount',nVid+' videos, the more you order the bigger the discount',-gross*pct,rec,true);
   }
  }
  const pre=R.typePre[t];
@@ -1108,12 +1089,19 @@ function calcCustom(S,R){
  const out0=S.mode==='once';
  if(out0&&(S.film||S.edit)){
   const base=L.filter(l=>!l.rec).reduce((a,l)=>a+l.amt,0);
-  if(base>0&&base<R.minProject)add('Project minimum','',R.minProject-base,false,false);
+  const floor=reelsOnly?R.minEdit:R.minProject;
+  if(base>0&&base<floor)add('Project minimum','',floor-base,false,false);
  }
  if(S.film&&S.shoots>0&&!inMetro(S)&&S.travel>0)add('Travel and lodging (estimate)','Final travel is quoted per project',S.travel,rec,false);
- return finish(L,{title:TYPES[t]+' · '+(rec?'Ongoing, monthly':'One-time project'),mode:S.mode,contents:mgmtItems?['Social media management includes:'].concat(mgmtItems):null});
+ return finish(L,{title:TYPES[t]+' · '+(rec?'Ongoing, monthly':'One-time project'),mode:S.mode,hardFloor:(S.edit&&nVid>0)?R.minEdit:0,floorRec:rec,contents:(function(){ const recTot=L.filter(l=>l.rec&&!/^Travel/.test(l.label)).reduce((a,l)=>a+l.amt,0);
+  const v=(rec&&S.film&&S.shoots>0&&recTot>=R.visits.minPrice)?['Filming:','Can be split into 1 to '+R.visits.max+' visits a month, up to '+R.visits.hours+' hrs each, so we can cover more than one day']:[];
+  const c=v.concat(mgmtItems?['Social media management includes:'].concat(mgmtItems):[]); return c.length?c:null; })()});
 }
 
+function visitsOK(p,R){ return !!(p&&p.mode==='monthly'&&p.shoot&&!p.noVisits&&R.pkg[p.id]>=R.visits.minPrice); }
+function visitCount(S,R){ return Math.max(1,Math.min(R.visits.max,Math.round(S.pkgVisits)||1)); }
+function visitLine(R,n){ return n?plural(n,'filming visit')+' a month, up to '+R.visits.hours+' hrs each':'1 to '+R.visits.max+' filming visits a month, up to '+R.visits.hours+' hrs each, so we can cover more than one day'; }
+function itemsFor(p,R){ return p.items.map(i=>i==='{VISITS}'?visitLine(R,0):i); }
 function calcPackage(S,R){
  const p=PKG_BY_ID[S.pkg]; const L=[];
  if(!p)return finish(L,{title:'',mode:'once'});
@@ -1121,13 +1109,15 @@ function calcPackage(S,R){
  const add=(label,detail,amt,recFlag,fee=true)=>{ const a=r5(amt); if(a!==0)L.push({label,detail,amt:a,rec:recFlag,fee}); };
  const price=R.pkg[p.id]; add(p.name,rec?'Per month':'One-time',price,rec);
  if(S.pkgReels>0)add('Additional Reels',plural(S.pkgReels,'Reel')+' at '+money(R.pkgExtraReel)+' each',S.pkgReels*R.pkgExtraReel,rec);
- let items=p.items.slice();
+ let items=itemsFor(p,R);
  if(rec){ const full=S.pkgMgmt==='full', pc=Math.min(5,Math.max(1,Math.round(S.pkgPlat)||1)); const SCHED='Captions written and posts scheduled on 1 platform';
   if(full){ add('Upgrade to full social media management',plural(pc,'platform'),(R.mgmt.first-R.mgmt.eFirst)+(pc-1)*R.mgmt.extra,true);
    items=items.filter(i=>i!==SCHED).concat(['Full social media management on '+plural(pc,'platform')+':'],MGMT.full); }
   else if(pc>1){ add('Additional platforms',plural(pc-1,'more platform')+', captions and scheduling',(pc-1)*R.mgmt.eExtra,true);
    items=items.map(i=>i===SCHED?'Captions written and posts scheduled on '+pc+' platforms':i); }
  }
+ if(visitsOK(p,R)){ const n=Math.min(R.visits.max,Math.max(0,Math.round(S.pkgVisits)||0)), line=visitLine(R,n), base=visitLine(R,0);
+  const i=items.indexOf(base); if(i>=0)items[i]=line; else items.splice(1,0,line); }
  if(S.pkgRush)add(rec?'Rush start, first month':'Rush turnaround',rec?'One-time priority fee: +'+pctText(R.extras.rush)+' of the monthly price':'+'+pctText(R.extras.rush),price*R.extras.rush,false);
  if(!p.noDiscount)adjustLines(L,S,R,add);
  if(p.shoot&&!inMetro(S)&&S.travel>0)add('Travel and lodging (estimate)','Final travel is quoted per project',S.travel,rec,false);
@@ -1192,18 +1182,20 @@ function tierFactor(k,R){ return k==='low'?R.spread.low:k==='high'?R.spread.high
 function calcTier(S,R,k){
  const res=calc(S,R); const f=tierFactor(k,R);
  if(f!==1)for(const l of res.lines){ if(!/^Travel/.test(l.label))l.amt=r5(l.amt*f); }
+ if(res.hardFloor){ const fr=!!res.floorRec; let tot=0; for(const l of res.lines){ if(l.rec===fr&&!/^Travel/.test(l.label))tot+=l.amt; }
+  if(tot>0&&tot<res.hardFloor){ const m=res.lines.find(l=>l.label==='Project minimum'&&l.rec===fr); if(m)m.amt+=res.hardFloor-tot; else { const i=res.lines.findIndex(l=>/^Travel/.test(l.label)); const ln={label:'Project minimum',detail:'',amt:res.hardFloor-tot,rec:fr,fee:false}; if(i>=0)res.lines.splice(i,0,ln); else res.lines.push(ln); } } }
  res.once=0; res.rec=0; for(const l of res.lines){ if(l.rec)res.rec+=l.amt; else res.once+=l.amt; }
  res.tier=k;
  if(res.lines.length)res.contents=(res.contents||[]).concat(['Revisions and scheduling:'],TIER_ITEMS[k]);
  return res;
 }
 function shooterRate(S,R){ return S.loc===METROS[0]?R.cost.shooter:R.cost.shooterAway; }
-function hireCost(S,R){
+function hireCost(S,R,visitsOverride){
  let s=0,r=0,b=0,rec;
  if(S.tab==='custom'){ rec=S.mode==='monthly';
   if(S.film&&S.shoots>0)s=S.shoots*(1+(S.crew||0));
   if(S.edit){ r=S.nReel||0; b=(S.nStd||0)+(S.nLong||0)+(S.nFeature||0); } }
- else { const p=PKG_BY_ID[S.pkg]; if(!p)return null; rec=p.mode==='monthly'; s=p.cost[0]; r=p.cost[1]+(S.pkgReels||0); b=p.cost[2]; }
+ else { const p=PKG_BY_ID[S.pkg]; if(!p)return null; rec=p.mode==='monthly'; s=p.cost[0]; if(visitsOK(p,R)&&s>0)s=visitsOverride||visitCount(S,R); r=p.cost[1]+(S.pkgReels||0); b=p.cost[2]; }
  const rate=shooterRate(S,R), away=S.loc!==METROS[0];
  const pf=[], pe=[];
  if(s>0)pf.push(plural(s,'videographer booking')+' × '+money(rate)+(away?' (outside DFW rate)':''));
@@ -1227,8 +1219,12 @@ function profitFor(S,res,R){
  const cls=worst.keep<=0?'bad':worst.pct<R.cost.warn?'warn':'ok';
  const fmt=x=>'• '+x.label+(x.parts.length?' ('+x.parts.join(' + ')+' = '+money(x.cost)+')':'')+': '+(x.keep>0?'you keep '+money(x.keep)+per+' ('+pctText(x.pct)+')':'a loss of '+money(-x.keep)+per);
  const head=rows.length?'Out of '+money(rev)+per+', after about '+pctText(R.cost.fee)+' payment fees ('+money(fee)+per+'):':'Nothing to hire out here. Out of '+money(rev)+per+', after about '+pctText(R.cost.fee)+' payment fees ('+money(fee)+per+'), you keep '+money(own.keep)+per+'.';
+ let vline='';
+ if(S.tab!=='custom'){ const p=PKG_BY_ID[S.pkg]; if(visitsOK(p,R)&&visitCount(S,R)<R.visits.max){
+   const c2=hireCost(S,R,R.visits.max), k2=rev-c2.total-fee;
+   vline='\nIf they use all '+R.visits.max+' visits a month and you hire every visit out: videographer cost '+money(c2.film)+', so you keep '+money(k2)+per+' ('+pctText(k2/rev)+') hiring everything. Film the extra visits yourself to protect the margin.'; } }
  const text=head+(rows.length?'\n'+rows.concat(own).map(fmt).join('\n'):'')+
-  (cls==='warn'?'\nThin if you hire everything out. Film or edit part of this yourself, or raise the price.':cls==='bad'?'\nDo not hire this one out at this price.':'');
+  (cls==='warn'?'\nThin if you hire everything out. Film or edit part of this yourself, or raise the price.':cls==='bad'?'\nDo not hire this one out at this price.':'')+vline;
  return {cost:worst.cost,rev,keep:worst.keep,pct:worst.pct,cls,rec:c.rec,fee,rows,own,text};
 }
 function priceText(r){ return [r.once>0?money(r.once):'',r.rec>0?money(r.rec)+'/mo':''].filter(Boolean).join(' + '); }
@@ -1351,23 +1347,7 @@ function buildReport(name,email,raw,R){
  out['11. Note']='The numbers above are an automated suggestion to save you a step — sanity-check before replying.';
  return out;
 }
- return { buildReport: function(name,email,raw){ const R=JSON.parse(JSON.stringify(DEFAULTS)); return buildReport(name,email,raw,R); },
- clientQuote: function(name,email,raw){
-  try{
-   const R=JSON.parse(JSON.stringify(DEFAULTS));
-   const sf=suggestFromForm(raw,R); const p=sf.pkgResult||sf.customResult;
-   if(!p||!p.res||!p.res.lines.length) return null;
-   const S=Object.assign({},p.state,{client:name||''});
-   const res=calcTier(S,R,'target'); if(!res.lines.length) return null;
-   const pt=r=>[r.once>0?money(r.once):'',r.rec>0?money(r.rec)+'/mo':''].filter(Boolean).join(' + ');
-   const lo=pt(calcTier(S,R,'low')), hi=pt(calcTier(S,R,'high')), head=pt(res);
-   const date=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-   const first=(name||'').trim().split(/\s+/)[0]||'there';
-   const text='Hi '+first+',\n\nThank you for requesting a quote from Crystal City Productions. Here is the suggested quote based on your answers. We will follow up within one business day to confirm the details and answer any questions.\n\n'+quoteText(res,S,R,date)+'\n\nThis is a suggested quote based on your answers. Final scope and pricing are confirmed with you before any work starts.\n\nCrystal City Productions\ncrystalcityprod.com';
-   const totals=[]; if(res.once>0)totals.push({label:'Project total',value:money(res.once)}); if(res.rec>0)totals.push({label:'Monthly',value:money(res.rec)+' a month'});
-   return {title:res.title, headline:head, range:(lo&&hi&&lo!==hi)?[lo,hi]:null, contents:res.contents||[], lines:res.lines.map(l=>({label:l.label,detail:l.detail||'',amt:money(l.amt)+(l.rec?'/mo':''),neg:l.amt<0})), totals:totals, terms:termsList(res,R), text:text};
-  }catch(e){ return null; }
- } };
+ return { buildReport: function(name,email,raw){ const R=JSON.parse(JSON.stringify(DEFAULTS)); return buildReport(name,email,raw,R); } };
 })();
 
 (function(){
@@ -1459,18 +1439,6 @@ function buildReport(name,email,raw,R){
      submission already triggers — never a second message. If the pricing
      engine hiccups for any reason, the plain submission still goes through
      untouched; a quote suggestion is a bonus, not a requirement. */
-  /* Client copy: FormSubmit's _autoresponse emails the submitter the quote text.
-     It carries only the client-safe quote (no profit math, no internal notes). */
-  function withClientCopy(payload, data){
-    try{
-      const cq = CCQuote.clientQuote(data['Name'], data['Email'], collectRaw());
-      if(!cq) return payload;
-      const out = Object.assign({}, payload);
-      out['email'] = data['Email'];
-      out['_autoresponse'] = cq.text;
-      return out;
-    }catch(e){ return payload; }
-  }
   function withSuggestedQuote(data){
     try{
       const report = CCQuote.buildReport(data['Name'], data['Email'], collectRaw());
@@ -1510,26 +1478,6 @@ function buildReport(name,email,raw,R){
       }
     });
   }
-  function renderQuote(data){
-    const box = document.getElementById('qfQuote');
-    if(!box || !data) return false;
-    const cq = CCQuote.clientQuote(data['Name'], data['Email'], collectRaw());
-    if(!cq){ box.hidden = true; return false; }
-    box.textContent = '';
-    const add = (tag, cls, txt, parent) => { const n = document.createElement(tag); if(cls) n.className = cls; if(txt != null) n.textContent = txt; (parent || box).appendChild(n); return n; };
-    add('span', 'eyebrow center', 'Your suggested quote');
-    add('h4', '', cq.title);
-    add('div', 'qq-price', cq.headline);
-    if(cq.range) add('p', 'qq-range', 'Typical range for this scope: ' + cq.range[0] + ' to ' + cq.range[1]);
-    if(cq.contents.length){
-      add('h5', '', 'What\u2019s included');
-      const ul = add('ul');
-      cq.contents.forEach(c => add('li', /:$/.test(c) ? 'h' : '', c, ul));
-    }
-    add('p', 'qq-fine', 'Your full breakdown and terms are in the email we\u2019re sending you. We\u2019ll confirm the scope and final pricing with you within one business day.');
-    box.hidden = false;
-    return true;
-  }
   function finish(mode, email, data){
     qf.classList.add('sent');
     const msg = document.getElementById('qfDoneMsg');
@@ -1538,7 +1486,6 @@ function buildReport(name,email,raw,R){
     } else {
       msg.innerHTML = 'Thank you. We&rsquo;ll send your custom quote to <b style="font-weight:400;color:var(--paper)"></b> within one business day.';
       msg.querySelector('b').textContent = email;
-      if(renderQuote(data)){ msg.innerHTML = 'Thank you. Your suggested quote is below, and we&rsquo;re emailing a copy to <b style="font-weight:400;color:var(--paper)"></b>. We&rsquo;ll follow up within one business day to confirm the details.'; msg.querySelector('b').textContent = email; }
     }
     showBooking(data);
     qf.scrollIntoView({behavior:'smooth', block:'start'});
@@ -1552,7 +1499,7 @@ function buildReport(name,email,raw,R){
     if(QUOTE_ENDPOINT){
       try{
         const r = await fetch(QUOTE_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json', 'Accept':'application/json'},
-          body: JSON.stringify(withClientCopy(withSuggestedQuote(data), data))});
+          body: JSON.stringify(withSuggestedQuote(data))});
         if(!r.ok) throw new Error(r.status);
         finish('sent', data['Email'], data);
       }catch(x){

@@ -980,10 +980,10 @@ const PKGS=[
  {id:'reels-growth',cost:[0,8,0],name:'Reels Growth',mode:'monthly',price:1400,shoot:false,items:['8 edited Reels a month from the client’s footage','2 carousels or graphics a month','Captions, music and cover frames','Content calendar and a monthly check-in call','Captions written and posts scheduled on 1 platform']},
  {id:'content-engine',cost:[1,12,2],name:'Content Engine',mode:'monthly',price:2600,shoot:true,items:['1 half-day shoot a month (up to 4 hrs)','12 Reels and 2 mid-length videos (1–3 min)','Color, sound and captions','Captions written and posts scheduled on 1 platform','Monthly strategy call and content calendar']},
  {id:'content-ads',cost:[1,12,2],name:'Content + Ads',mode:'monthly',price:3500,shoot:true,items:['Everything in Content Engine','Targeted ads on up to $3,000 a month of ad spend','Monthly report: reach, clicks, leads, cost per result']},
- {id:'real-estate',cost:[3,6,3],name:'Real Estate Retainer',mode:'monthly',price:2950,shoot:true,items:['3 listing videos a month (2–3 min each)','6 Reels cut from the listing footage','Drone footage on every listing','Captions and music','Captions written and posts scheduled on 1 platform']},
+ {id:'real-estate',cost:[3,6,3],name:'Real Estate Retainer',mode:'monthly',price:3050,shoot:true,items:['3 listing videos a month (2–3 min each)','6 Reels cut from the listing footage','Drone footage on every listing','Captions and music','Captions written and posts scheduled on 1 platform']},
  {id:'community',cost:[2,8,1],name:'Nonprofit & Community Media',mode:'monthly',price:2400,shoot:true,noDiscount:true,items:['2 events, programs or talks covered a month (up to 4 hrs each)','8 Reels from events and talks','1 recap video (1–3 min)','Weekly content calendar','Captions written and posts scheduled on 1 platform']},
  {id:'reel-day',cost:[1,4,0],name:'Reel Day',mode:'once',price:1350,shoot:true,items:['Half-day shoot (up to 4 hrs)','4 edited Reels','Captions, music and color']},
- {id:'listing',cost:[1,1,1],name:'Listing Video',mode:'once',price:900,shoot:true,items:['One property, 2–3 min tour','Drone footage','1 Reel cut from the same shoot','Captions and music']},
+ {id:'listing',cost:[1,1,1],name:'Listing Video',mode:'once',price:1000,shoot:true,items:['One property, 2–3 min tour','Drone footage','1 Reel cut from the same shoot','Captions and music']},
  {id:'event-highlight',cost:[1,1,1],name:'Event Highlight',mode:'once',price:1250,shoot:true,items:['Up to 4 hrs of coverage','2–3 min highlight video','1 Reel','Color and sound']},
  {id:'spot',cost:[1,2,1],name:'Spot Commercial',mode:'once',price:2500,shoot:true,items:['Concept and shot list','Half-day shoot (up to 4 hrs)','1 hero spot (30–60 sec) and 2 cutdowns','Color, sound and captions']},
  {id:'campaign',cost:[1,10,1],name:'Commercial Campaign',mode:'once',price:5200,shoot:true,items:['Concept, script and shot list','Full-day shoot (up to 8 hrs)','1 hero video, 4 cutdowns and 6 Reels','15 edited stills','Color, sound and captions']},
@@ -1008,7 +1008,7 @@ const DEFAULTS={
  extras:{photos:300,call:150,subs:15,drone:200,rush:.35},
  travel:{other:1500},
  clientMult:{local:1,realestate:1,religious:.9,creator:.95,brand:1.15,other:1},
- cost:{shooter:250,reel:50,big:200,warn:.35},
+ cost:{shooter:250,shooterAway:300,reel:50,big:200,fee:.03,warn:.35},
  minProject:750,
  pkgExtraReel:150,
  spread:{low:.90,high:1.15,floor:.85},
@@ -1174,28 +1174,39 @@ function calcTier(S,R,k){
  if(res.lines.length)res.contents=(res.contents||[]).concat(['Revisions and scheduling:'],TIER_ITEMS[k]);
  return res;
 }
+function shooterRate(S,R){ return S.loc===METROS[0]?R.cost.shooter:R.cost.shooterAway; }
 function hireCost(S,R){
  let s=0,r=0,b=0,rec;
  if(S.tab==='custom'){ rec=S.mode==='monthly';
   if(S.film&&S.shoots>0)s=S.shoots*(1+(S.crew||0));
   if(S.edit){ r=S.nReel||0; b=(S.nStd||0)+(S.nLong||0)+(S.nFeature||0); } }
  else { const p=PKG_BY_ID[S.pkg]; if(!p)return null; rec=p.mode==='monthly'; s=p.cost[0]; r=p.cost[1]+(S.pkgReels||0); b=p.cost[2]; }
- const parts=[];
- if(s>0)parts.push(plural(s,'videographer booking')+' × '+money(R.cost.shooter));
- if(r>0)parts.push(plural(r,'Reel edit')+' × '+money(R.cost.reel));
- if(b>0)parts.push(plural(b,'larger edit')+' × '+money(R.cost.big));
- return {s,r,b,rec,parts,total:s*R.cost.shooter+r*R.cost.reel+b*R.cost.big};
+ const rate=shooterRate(S,R), away=S.loc!==METROS[0];
+ const pf=[], pe=[];
+ if(s>0)pf.push(plural(s,'videographer booking')+' × '+money(rate)+(away?' (outside DFW rate)':''));
+ if(r>0)pe.push(plural(r,'Reel edit')+' × '+money(R.cost.reel));
+ if(b>0)pe.push(plural(b,'larger edit')+' × '+money(R.cost.big));
+ const film=s*rate, edit=r*R.cost.reel+b*R.cost.big;
+ return {s,r,b,rec,rate,away,film,edit,partsFilm:pf,partsEdit:pe,parts:pf.concat(pe),total:film+edit};
 }
 function profitFor(S,res,R){
- const c=hireCost(S,R); if(!c||!c.total)return null;
+ const c=hireCost(S,R); if(!c)return null;
  let rev=0; for(const l of res.lines){ if(l.rec===c.rec&&!/^Travel/.test(l.label))rev+=l.amt; }
  if(rev<=0)return null;
- const keep=rev-c.total, pct=keep/rev, per=c.rec?' a month':'';
- const cls=keep<=0?'bad':pct<R.cost.warn?'warn':'ok';
- const text='If you hire out all the filming and editing: '+c.parts.join(' + ')+' = '+money(c.total)+per+'. '+
-  (keep>0?'You keep '+money(keep)+per+' of '+money(rev)+' ('+pctText(pct)+').':'You would lose '+money(-keep)+per+'.')+
-  (cls==='warn'?' Thin. Film or edit part of this yourself, or raise the price.':cls==='bad'?' Do not hire this one out at this price.':'');
- return {cost:c.total,rev,keep,pct,cls,rec:c.rec,text};
+ const per=c.rec?' a month':'', fee=rev*R.cost.fee;
+ const sc=(label,cost,parts)=>{ const keep=rev-cost-fee; return {label,cost,keep,pct:keep/rev,parts}; };
+ const rows=[];
+ if(c.film>0&&c.edit>0){ rows.push(sc('Hire everything out',c.total,c.parts)); rows.push(sc('You film, an editor edits',c.edit,c.partsEdit)); rows.push(sc('A videographer films, you edit',c.film,c.partsFilm)); }
+ else if(c.film>0)rows.push(sc('Hire the videographer',c.film,c.partsFilm));
+ else if(c.edit>0)rows.push(sc('Hire the editing out',c.edit,c.partsEdit));
+ const own=sc('Do all of it yourself',0,[]);
+ const worst=rows.length?rows[0]:own;
+ const cls=worst.keep<=0?'bad':worst.pct<R.cost.warn?'warn':'ok';
+ const fmt=x=>'• '+x.label+(x.parts.length?' ('+x.parts.join(' + ')+' = '+money(x.cost)+')':'')+': '+(x.keep>0?'you keep '+money(x.keep)+per+' ('+pctText(x.pct)+')':'a loss of '+money(-x.keep)+per);
+ const head=rows.length?'Out of '+money(rev)+per+', after about '+pctText(R.cost.fee)+' payment fees ('+money(fee)+per+'):':'Nothing to hire out here. Out of '+money(rev)+per+', after about '+pctText(R.cost.fee)+' payment fees ('+money(fee)+per+'), you keep '+money(own.keep)+per+'.';
+ const text=head+(rows.length?'\n'+rows.concat(own).map(fmt).join('\n'):'')+
+  (cls==='warn'?'\nThin if you hire everything out. Film or edit part of this yourself, or raise the price.':cls==='bad'?'\nDo not hire this one out at this price.':'');
+ return {cost:worst.cost,rev,keep:worst.keep,pct:worst.pct,cls,rec:c.rec,fee,rows,own,text};
 }
 function priceText(r){ return [r.once>0?money(r.once):'',r.rec>0?money(r.rec)+'/mo':''].filter(Boolean).join(' + '); }
 /* ---- form -> suggestion mapper (mirrors the quote generator's own engine) ---- */
@@ -1306,7 +1317,7 @@ function buildReport(name,email,raw,R){
  out['4. What to offer']=contents(primary.res)||'(nothing priced — check their answers, something may be missing)';
  out['5. Price breakdown']=lines(primary.res);
  const pf=profitFor(primary.state,primary.res,R);
- out['6. Your profit (not for the client)']=pf?pf.text:'Nothing to hire out here. This quote has no filming or editing in it, so the fee is yours.';
+ out['6. Your profit (not for the client)']=pf?pf.text:'Nothing priced here yet, so there is no profit to work out.';
  if(pkgResult && customResult.res.lines.length){
   const pf2=profitFor(customResult.state,customResult.res,R);
   out['7. Cross-check: built from their exact answers instead']=tierLine(customResult.res)+'\n'+lines(customResult.res)+(pf2?'\n'+pf2.text:'');

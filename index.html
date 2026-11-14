@@ -1000,7 +1000,7 @@ const PKGS=[
  {id:'content-engine',cost:[1,12,2],name:'Content Engine',mode:'monthly',price:2600,shoot:true,items:['{VISITS}','12 Reels and 2 mid-length videos (1–3 min)','Color, sound and captions','Captions written and posts scheduled on 1 platform','Monthly strategy call and content calendar']},
  {id:'content-ads',cost:[1,12,2],name:'Content + Ads',mode:'monthly',price:3500,shoot:true,items:['Everything in Content Engine','Targeted ads on up to $3,000 a month of ad spend','Monthly report: reach, clicks, leads, cost per result']},
  {id:'real-estate',noVisits:true,cost:[3,6,3],name:'Real Estate Retainer',mode:'monthly',price:3050,shoot:true,items:['3 listing videos a month (2–3 min each)','6 Reels cut from the listing footage','Drone footage on every listing','Captions and music','Captions written and posts scheduled on 1 platform']},
- {id:'community',cost:[2,8,1],name:'Nonprofit & Community Media',mode:'monthly',price:2400,shoot:true,noDiscount:true,items:['2 events, programs or talks covered a month (up to 4 hrs each)','8 Reels from events and talks','1 recap video (1–3 min)','Weekly content calendar','Captions written and posts scheduled on 1 platform']},
+ {id:'community',cost:[2,8,1],name:'Nonprofit & Community Media',mode:'monthly',price:2400,shoot:true,noDiscount:true,visitItem:'2 events, programs or talks covered a month (up to 4 hrs each)',items:['2 events, programs or talks covered a month (up to 4 hrs each)','8 Reels from events and talks','1 recap video (1–3 min)','Weekly content calendar','Captions written and posts scheduled on 1 platform']},
  {id:'reel-day',cost:[1,4,0],name:'Reel Day',mode:'once',price:1350,shoot:true,items:['Half-day shoot (up to 4 hrs)','4 edited Reels','Captions, music and color']},
  {id:'listing',cost:[1,1,1],name:'Listing Video',mode:'once',price:1000,shoot:true,items:['One property, 2–3 min tour','Drone footage','1 Reel cut from the same shoot','Captions and music']},
  {id:'event-highlight',cost:[1,1,1],name:'Event Highlight',mode:'once',price:1250,shoot:true,items:['Up to 4 hrs of coverage','2–3 min highlight video','1 Reel','Color and sound']},
@@ -1117,10 +1117,14 @@ function calcCustom(S,R){
   const c=v.concat(mgmtItems?['Social media management includes:'].concat(mgmtItems):[]); return c.length?c:null; })()});
 }
 
-function visitsOK(p,R){ return !!(p&&p.mode==='monthly'&&p.shoot&&!p.noVisits&&R.pkg[p.id]>=R.visits.minPrice); }
-function visitCount(S,R){ return Math.max(1,Math.min(R.visits.max,Math.round(S.pkgVisits)||1)); }
-function visitLine(R,n){ return n?plural(n,'filming visit')+' a month, up to '+R.visits.hours+' hrs each':'1 to '+R.visits.max+' filming visits a month, up to '+R.visits.hours+' hrs each, so we can cover more than one day'; }
-function itemsFor(p,R){ return p.items.map(i=>i==='{VISITS}'?visitLine(R,0):i); }
+function visitsBase(p,R){ return !!(p&&p.mode==='monthly'&&p.shoot&&!p.noVisits); }
+function pkgListTotal(S,R){ const p=PKG_BY_ID[S.pkg]; if(!p)return 0; let t=R.pkg[p.id]+(S.pkgReels||0)*R.pkgExtraReel;
+ if(p.mode==='monthly'){ const pc=Math.min(5,Math.max(1,Math.round(S.pkgPlat)||1)); t+=S.pkgMgmt==='full'?(R.mgmt.first-R.mgmt.eFirst)+(pc-1)*R.mgmt.extra:(pc-1)*R.mgmt.eExtra; } return t; }
+function visitsOK(S,R){ const p=PKG_BY_ID[S.pkg]; return visitsBase(p,R)&&pkgListTotal(S,R)>=R.visits.minPrice; }
+function visitCount(S,R){ const p=PKG_BY_ID[S.pkg]; return Math.max(1,Math.min(R.visits.max,Math.round(S.pkgVisits)||(p?p.cost[0]:1)||1)); }
+function visitLine(R,n,p){ const ev=p&&p.id==='community'?' for your events, programs or talks':''; return n?plural(n,'filming visit')+' a month'+ev+', up to '+R.visits.hours+' hrs each':'1 to '+R.visits.max+' filming visits a month'+ev+', up to '+R.visits.hours+' hrs each'+(ev?'':', so we can cover more than one day'); }
+const HALF_DAY='1 half-day shoot a month (up to 4 hrs)';
+function itemsFor(p,R,on){ if(on===undefined)on=visitsBase(p,R)&&R.pkg[p.id]>=R.visits.minPrice; return p.items.map(i=>i==='{VISITS}'?(on?visitLine(R,0,p):HALF_DAY):(on&&p.visitItem===i)?visitLine(R,0,p):i); }
 function calcPackage(S,R){
  const p=PKG_BY_ID[S.pkg]; const L=[];
  if(!p)return finish(L,{title:'',mode:'once'});
@@ -1128,15 +1132,15 @@ function calcPackage(S,R){
  const add=(label,detail,amt,recFlag,fee=true)=>{ const a=r5(amt); if(a!==0)L.push({label,detail,amt:a,rec:recFlag,fee}); };
  const price=R.pkg[p.id]; add(p.name,rec?'Per month':'One-time',price,rec);
  if(S.pkgReels>0)add('Additional Reels',plural(S.pkgReels,'Reel')+' at '+money(R.pkgExtraReel)+' each',S.pkgReels*R.pkgExtraReel,rec);
- let items=itemsFor(p,R);
+ const vOK=visitsOK(S,R); let items=itemsFor(p,R,vOK);
  if(rec){ const full=S.pkgMgmt==='full', pc=Math.min(5,Math.max(1,Math.round(S.pkgPlat)||1)); const SCHED='Captions written and posts scheduled on 1 platform';
   if(full){ add('Upgrade to full social media management',plural(pc,'platform'),(R.mgmt.first-R.mgmt.eFirst)+(pc-1)*R.mgmt.extra,true);
    items=items.filter(i=>i!==SCHED).concat(['Full social media management on '+plural(pc,'platform')+':'],MGMT.full); }
   else if(pc>1){ add('Additional platforms',plural(pc-1,'more platform')+', captions and scheduling',(pc-1)*R.mgmt.eExtra,true);
    items=items.map(i=>i===SCHED?'Captions written and posts scheduled on '+pc+' platforms':i); }
  }
- if(visitsOK(p,R)){ const n=Math.min(R.visits.max,Math.max(0,Math.round(S.pkgVisits)||0)), line=visitLine(R,n), base=visitLine(R,0);
-  const i=items.indexOf(base); if(i>=0)items[i]=line; else items.splice(1,0,line); }
+ if(vOK){ const n=Math.min(R.visits.max,Math.max(0,Math.round(S.pkgVisits)||0));
+  if(n){ const base=visitLine(R,0,p), i=items.indexOf(base); if(i>=0)items[i]=visitLine(R,n,p); } }
  if(S.pkgRush)add(rec?'Rush start, first month':'Rush turnaround',rec?'One-time priority fee: +'+pctText(R.extras.rush)+' of the monthly price':'+'+pctText(R.extras.rush),price*R.extras.rush,false);
  if(!p.noDiscount)adjustLines(L,S,R,add);
  if(p.shoot&&!inMetro(S)&&S.travel>0)add('Travel and lodging (estimate)','Final travel is quoted per project',S.travel,rec,false);
@@ -1214,7 +1218,7 @@ function hireCost(S,R,visitsOverride){
  if(S.tab==='custom'){ rec=S.mode==='monthly';
   if(S.film&&S.shoots>0)s=S.shoots*(1+(S.crew||0));
   if(S.edit){ r=S.nReel||0; b=(S.nStd||0)+(S.nLong||0)+(S.nFeature||0); } }
- else { const p=PKG_BY_ID[S.pkg]; if(!p)return null; rec=p.mode==='monthly'; s=p.cost[0]; if(visitsOK(p,R)&&s>0)s=visitsOverride||visitCount(S,R); r=p.cost[1]+(S.pkgReels||0); b=p.cost[2]; }
+ else { const p=PKG_BY_ID[S.pkg]; if(!p)return null; rec=p.mode==='monthly'; s=p.cost[0]; if(visitsOK(S,R)&&s>0)s=visitsOverride||visitCount(S,R); r=p.cost[1]+(S.pkgReels||0); b=p.cost[2]; }
  const rate=shooterRate(S,R), away=S.loc!==METROS[0];
  const pf=[], pe=[];
  if(s>0)pf.push(plural(s,'videographer booking')+' × '+money(rate)+(away?' (outside DFW rate)':''));
@@ -1239,7 +1243,7 @@ function profitFor(S,res,R){
  const fmt=x=>'• '+x.label+(x.parts.length?' ('+x.parts.join(' + ')+' = '+money(x.cost)+')':'')+': '+(x.keep>0?'you keep '+money(x.keep)+per+' ('+pctText(x.pct)+')':'a loss of '+money(-x.keep)+per);
  const head=rows.length?'Out of '+money(rev)+per+', after about '+pctText(R.cost.fee)+' payment fees ('+money(fee)+per+'):':'Nothing to hire out here. Out of '+money(rev)+per+', after about '+pctText(R.cost.fee)+' payment fees ('+money(fee)+per+'), you keep '+money(own.keep)+per+'.';
  let vline='';
- if(S.tab!=='custom'){ const p=PKG_BY_ID[S.pkg]; if(visitsOK(p,R)&&visitCount(S,R)<R.visits.max){
+ if(S.tab!=='custom'){ const p=PKG_BY_ID[S.pkg]; if(visitsOK(S,R)&&visitCount(S,R)<R.visits.max){
    const c2=hireCost(S,R,R.visits.max), k2=rev-c2.total-fee;
    vline='\nIf they use all '+R.visits.max+' visits a month and you hire every visit out: videographer cost '+money(c2.film)+', so you keep '+money(k2)+per+' ('+pctText(k2/rev)+') hiring everything. Film the extra visits yourself to protect the margin.'; } }
  const text=head+(rows.length?'\n'+rows.concat(own).map(fmt).join('\n'):'')+

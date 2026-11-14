@@ -977,6 +977,8 @@ html body .w-cap b{font-size:clamp(13px,1.35vw,19px)!important}
    ============================================================ */
 const QUOTE_ENDPOINT = "https://formsubmit.co/ajax/crystalcityprod@gmail.com";
 const QUOTE_EMAIL    = "crystalcityprod@gmail.com";
+/* Client quote email is sent from the Crystal City Google Apps Script (same web app as the upload page). */
+const CLIENT_MAIL_URL = "https://script.google.com/macros/s/AKfycbyDwDwjsIbBlc95Sz3QnbfoIz40_rRLuVpN5FdxCu9KAMcJmfww44rXxBmvBpmzOTf5/exec";
 
 /* ============================================================
    1b) SUGGESTED QUOTE — runs the same pricing engine as the
@@ -1480,17 +1482,33 @@ function buildReport(name,email,raw,R){
      submission already triggers — never a second message. If the pricing
      engine hiccups for any reason, the plain submission still goes through
      untouched; a quote suggestion is a bonus, not a requirement. */
-  /* Client copy: FormSubmit's _autoresponse emails the submitter the quote text.
-     It carries only the client-safe quote (no profit math, no internal notes). */
-  function withClientCopy(payload, data){
+  /* Client copy: sent from our own Google Apps Script, not FormSubmit. It carries only the
+     client-safe quote (no profit math, no internal notes) plus the secure pay link when one applies. */
+  function payUrlFor(cq, email){
+    const pk = cq && cq.pay && PAY_LINKS[cq.pay.id];
+    if(!pk || pk.amount !== cq.pay.cents) return '';
+    let href = pk.url; const em = String(email || '').trim();
+    if(em) href += (href.indexOf('?') > -1 ? '&' : '?') + 'prefilled_email=' + encodeURIComponent(em);
+    return href;
+  }
+  function sendClientQuote(data){
     try{
+      if(!CLIENT_MAIL_URL) return;
       const cq = CCQuote.clientQuote(data['Name'], data['Email'], collectRaw());
-      if(!cq) return payload;
-      const out = Object.assign({}, payload);
-      out['email'] = data['Email'];
-      out['_autoresponse'] = cq.text;
-      return out;
-    }catch(e){ return payload; }
+      if(!cq) return;
+      let text = cq.text;
+      const href = payUrlFor(cq, data['Email']);
+      if(href){
+        const amt = '$' + (PAY_LINKS[cq.pay.id].amount / 100).toLocaleString('en-US');
+        const block = cq.pay.rec
+          ? 'READY TO START?\nSubscribe securely with Stripe: ' + href + '\nToday you pay ' + amt + ' for your first month. Your plan then renews every month on the same date until you cancel (14 days\u2019 notice to pause or cancel).\n\n'
+          : 'READY TO BOOK?\nPay your 50% deposit (' + amt + ') securely with Stripe: ' + href + '\nThe remaining balance is due before final delivery.\n\n';
+        const k = text.lastIndexOf('This is a suggested quote based on your answers.');
+        text = k > -1 ? text.slice(0, k) + block + text.slice(k) : text + '\n\n' + block;
+      }
+      fetch(CLIENT_MAIL_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, keepalive:true,
+        body: JSON.stringify({action:'quote', name:data['Name'], email:data['Email'], text:text, website:''})}).catch(function(){});
+    }catch(e){}
   }
   function withSuggestedQuote(data){
     try{
@@ -1505,14 +1523,14 @@ function buildReport(name,email,raw,R){
   }
   /* Calendly: after the quote is sent, offer a call right on the confirmation screen.
      Name, email and project notes are prefilled so they only pick a time. */
-  /* Stripe Payment Links, one per package (live). amount is in cents: the full first month for monthly retainers, 50% deposit for one-time packages. The Pay button only shows when the on-screen quote is exactly one package line, no adjustments, and its price matches the link's amount. */
+  /* Stripe Payment Links, one per package (live). amount is in cents: monthly retainers are real Stripe subscriptions (first month charged now, then renews monthly until cancelled), one-time packages take a 50% deposit. The Pay button only shows when the on-screen quote is exactly one package line, no adjustments, and its price matches the link's amount. */
   const PAY_LINKS = {
-    'reels-starter': {url:'https://book.stripe.com/00w8wPcyK4lt9PR6FS57W01', amount:75000},
-    'reels-growth': {url:'https://book.stripe.com/6oU5kDaqC05d7HJ6FS57W02', amount:140000},
-    'content-engine': {url:'https://book.stripe.com/9B614n42e4ltfab0hu57W00', amount:260000},
-    'content-ads': {url:'https://book.stripe.com/5kQ4gzfKWg4baTV2pC57W03', amount:350000},
-    'real-estate': {url:'https://book.stripe.com/8x28wP8iucRZ3rt2pC57W04', amount:305000},
-    'community': {url:'https://book.stripe.com/bJe9ATeGS4lt9PRc0c57W05', amount:240000},
+    'reels-starter': {url:'https://buy.stripe.com/00wfZh8iu19h5zB7JW57W0d', amount:75000},
+    'reels-growth': {url:'https://buy.stripe.com/8x228r1U6dW34vx9S457W0e', amount:140000},
+    'content-engine': {url:'https://buy.stripe.com/fZu14n0Q25pxd23fco57W0f', amount:260000},
+    'content-ads': {url:'https://buy.stripe.com/5kQ28rdCOdW39PR5BO57W0g', amount:350000},
+    'real-estate': {url:'https://buy.stripe.com/28EdR97eqbNVfab1ly57W0h', amount:305000},
+    'community': {url:'https://buy.stripe.com/14A4gz6amcRZ5zB1ly57W0i', amount:240000},
     'reel-day': {url:'https://book.stripe.com/fZueVd0Q25pxd231ly57W06', amount:67500},
     'listing': {url:'https://book.stripe.com/14AfZheGS7xF5zB1ly57W07', amount:50000},
     'event-highlight': {url:'https://book.stripe.com/5kQ8wP1U605d2npfco57W08', amount:62500},
@@ -1572,8 +1590,8 @@ function buildReport(name,email,raw,R){
       if(em) href += (href.indexOf('?') > -1 ? '&' : '?') + 'prefilled_email=' + encodeURIComponent(em);
       const amt = '$' + (pk.amount / 100).toLocaleString('en-US');
       const a = add('a', 'btn solid', null, payBox); a.href = href; a.rel = 'noopener';
-      add('span', '', cq.pay.rec ? 'Pay ' + amt + ' to book (first month)' : 'Pay ' + amt + ' deposit to book', a);
-      add('p', '', cq.pay.rec ? 'Secure checkout by Stripe. This covers your first month.' : 'Secure checkout by Stripe. The deposit is 50% of the quote.', payBox);
+      add('span', '', cq.pay.rec ? 'Subscribe: ' + amt + ' first month' : 'Pay ' + amt + ' deposit to book', a);
+      add('p', '', cq.pay.rec ? 'Secure checkout by Stripe. You pay your first month today, then your plan renews monthly until you cancel.' : 'Secure checkout by Stripe. The deposit is 50% of the quote.', payBox);
     } else {
       const a = add('a', 'btn', null, payBox); a.href = '/call';
       add('span', '', 'Book a call', a);
@@ -1604,8 +1622,9 @@ function buildReport(name,email,raw,R){
     if(QUOTE_ENDPOINT){
       try{
         const r = await fetch(QUOTE_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json', 'Accept':'application/json'},
-          body: JSON.stringify(withClientCopy(withSuggestedQuote(data), data))});
+          body: JSON.stringify(withSuggestedQuote(data))});
         if(!r.ok) throw new Error(r.status);
+        sendClientQuote(data);
         finish('sent', data['Email'], data);
       }catch(x){
         err.textContent = 'That did not go through. Please try again, or email us at ' + QUOTE_EMAIL + '.';

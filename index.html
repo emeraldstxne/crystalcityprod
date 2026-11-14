@@ -1030,7 +1030,7 @@ const DEFAULTS={
  travel:{other:750},
  clientMult:{local:1,realestate:1,religious:.9,creator:.95,brand:1.15,other:1},
  cost:{shooter:250,shooterAway:300,reel:50,big:200,fee:.03,warn:.35},
- visits:{minPrice:2600,max:4,hours:2},
+ visits:{minPrice:2400,minPriceNp:2100,max:4,hours:2},
  minProject:750,
  minEdit:300,
  pkgExtraReel:150,
@@ -1117,7 +1117,7 @@ function calcCustom(S,R){
  }
  if(S.film&&S.shoots>0&&!inMetro(S)&&S.travel>0)add('Travel and lodging (estimate)','Final travel is quoted per project',S.travel,rec,false);
  return finish(L,{title:TYPES[t]+' · '+(rec?'Ongoing, monthly':'One-time project'),mode:S.mode,hardFloor:(S.edit&&nVid>0)?R.minEdit:0,floorRec:rec,contents:(function(){ const recTot=L.filter(l=>l.rec&&!/^Travel/.test(l.label)).reduce((a,l)=>a+l.amt,0);
-  const v=(rec&&S.film&&S.shoots>0&&recTot>=R.visits.minPrice)?['Filming:','Can be split into 1 to '+R.visits.max+' visits a month, up to '+R.visits.hours+' hrs each, so we can cover more than one day']:[];
+  const v=(rec&&S.film&&S.shoots>0&&recTot>=visitMin(S,R))?['Filming:','Can be split into 1 to '+R.visits.max+' visits a month, up to '+R.visits.hours+' hrs each, so we can cover more than one day']:[];
   const c=v.concat(mgmtItems?['Social media management includes:'].concat(mgmtItems):[]); return c.length?c:null; })()});
 }
 
@@ -1126,11 +1126,12 @@ function platRate(S,R,full){ const p=S.tab==='custom'?null:PKG_BY_ID[S.pkg]; con
 function visitsBase(p,R){ return !!(p&&p.mode==='monthly'&&p.shoot&&!p.noVisits); }
 function pkgListTotal(S,R){ const p=PKG_BY_ID[S.pkg]; if(!p)return 0; let t=R.pkg[p.id]+(S.pkgReels||0)*R.pkgExtraReel;
  if(p.mode==='monthly'){ const pc=pkgPc(S); t+=pc<1?0:S.pkgMgmt==='full'?(R.mgmt.first-R.mgmt.eFirst)+(pc-1)*platRate(S,R,true):(pc-1)*platRate(S,R,false); } return t; }
-function visitsOK(S,R){ const p=PKG_BY_ID[S.pkg]; return visitsBase(p,R)&&pkgListTotal(S,R)>=R.visits.minPrice; }
+function visitMin(S,R){ return isNp(S)?R.visits.minPriceNp:R.visits.minPrice; }
+function visitsOK(S,R){ const p=PKG_BY_ID[S.pkg]; return visitsBase(p,R)&&pkgListTotal(S,R)>=visitMin(S,R); }
 function visitCount(S,R){ const p=PKG_BY_ID[S.pkg]; return Math.max(1,Math.min(R.visits.max,Math.round(S.pkgVisits)||(p?p.cost[0]:1)||1)); }
 function visitLine(R,n,p){ const ev=p&&p.id==='community'?' for your events, programs or talks':''; return n?plural(n,'filming visit')+' a month'+ev+', up to '+R.visits.hours+' hrs each':'1 to '+R.visits.max+' filming visits a month'+ev+', up to '+R.visits.hours+' hrs each'+(ev?'':', so we can cover more than one day'); }
 const HALF_DAY='1 half-day shoot a month (up to 4 hrs)';
-function itemsFor(p,R,on){ if(on===undefined)on=visitsBase(p,R)&&R.pkg[p.id]>=R.visits.minPrice; return p.items.map(i=>i==='{VISITS}'?(on?visitLine(R,0,p):HALF_DAY):(on&&p.visitItem===i)?visitLine(R,0,p):i); }
+function itemsFor(p,R,on){ if(on===undefined)on=visitsBase(p,R)&&R.pkg[p.id]>=(p.id==='community'?R.visits.minPriceNp:R.visits.minPrice); return p.items.map(i=>i==='{VISITS}'?(on?visitLine(R,0,p):HALF_DAY):(on&&p.visitItem===i)?visitLine(R,0,p):i); }
 function calcPackage(S,R){
  const p=PKG_BY_ID[S.pkg]; const L=[];
  if(!p)return finish(L,{title:'',mode:'once'});

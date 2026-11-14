@@ -1001,10 +1001,10 @@ const PKGS=[
  {id:'reels-growth',cost:[0,8,0],name:'Reels Growth',mode:'monthly',price:1400,shoot:false,items:['8 edited Reels a month from the client’s footage','2 carousels or graphics a month','Captions, music and cover frames','Content calendar and a monthly check-in call','Captions written and posts scheduled on 1 platform']},
  {id:'content-engine',cost:[1,12,2],name:'Content Engine',mode:'monthly',price:2600,shoot:true,items:['{VISITS}','12 Reels and 2 mid-length videos (1–3 min)','Color, sound and captions','Captions written and posts scheduled on 1 platform','Monthly strategy call and content calendar']},
  {id:'content-ads',cost:[1,12,2],name:'Content + Ads',mode:'monthly',price:3500,shoot:true,items:['Everything in Content Engine','Targeted ads on up to $3,000 a month of ad spend','Monthly report: reach, clicks, leads, cost per result']},
- {id:'real-estate',noVisits:true,cost:[3,6,3],name:'Real Estate Retainer',mode:'monthly',price:3050,shoot:true,items:['3 listing videos a month (2–3 min each)','6 Reels cut from the listing footage','Drone footage on every listing','Captions and music','Captions written and posts scheduled on 1 platform']},
+ {id:'real-estate',leanMin:.96,noVisits:true,cost:[3,6,3],name:'Real Estate Retainer',mode:'monthly',price:3050,shoot:true,items:['3 listing videos a month (2–3 min each)','6 Reels cut from the listing footage','Drone footage on every listing','Captions and music','Captions written and posts scheduled on 1 platform']},
  {id:'community',cost:[2,8,1],name:'Nonprofit & Community Media',mode:'monthly',price:2400,shoot:true,noDiscount:true,visitItem:'2 events, programs or talks covered a month (up to 4 hrs each)',items:['2 events, programs or talks covered a month (up to 4 hrs each)','8 Reels from events and talks','1 recap video (1–3 min)','Weekly content calendar','Captions written and posts scheduled on 1 platform']},
  {id:'reel-day',cost:[1,4,0],name:'Reel Day',mode:'once',price:1350,shoot:true,items:['Half-day shoot (up to 4 hrs)','4 edited Reels','Captions, music and color']},
- {id:'listing',cost:[1,1,1],name:'Listing Video',mode:'once',price:900,shoot:true,items:['One property, 2–3 min tour','Drone footage','1 Reel cut from the same shoot','Captions and music']},
+ {id:'listing',leanMin:1,cost:[1,1,1],name:'Listing Video',mode:'once',price:900,shoot:true,items:['One property, 2–3 min tour','Drone footage','1 Reel cut from the same shoot','Captions and music']},
  {id:'event-highlight',cost:[1,1,1],name:'Event Highlight',mode:'once',price:1250,shoot:true,items:['Up to 4 hrs of coverage','2–3 min highlight video','1 Reel','Color and sound']},
  {id:'spot',cost:[1,2,1],name:'Spot Commercial',mode:'once',price:2500,shoot:true,items:['Concept and shot list','Half-day shoot (up to 4 hrs)','1 hero spot (30–60 sec) and 2 cutdowns','Color, sound and captions']},
  {id:'campaign',cost:[1,10,1],name:'Commercial Campaign',mode:'once',price:5200,shoot:true,items:['Concept, script and shot list','Full-day shoot (up to 8 hrs)','1 hero video, 4 cutdowns and 6 Reels','15 edited stills','Color, sound and captions']},
@@ -1026,7 +1026,7 @@ const DEFAULTS={
  typePre:{commercial:.10,realestate:0,event:0,shortfilm:.15,documentary:.12,musicvideo:.10,social:0,other:0},
  mgmt:{first:750,extra:100,eFirst:450,eExtra:100,npExtra:50},
  ads:{min:750,pct:.15},
- extras:{photos:300,call:150,subs:15,drone:200,rush:.35},
+ extras:{photos:300,photosNp:150,photoCount:10,call:150,subs:15,drone:200,rush:.25,callNp:100,droneNp:100,rushNp:.15},
  travel:{other:750},
  clientMult:{local:1,realestate:1,religious:.9,creator:.95,brand:1.15,other:1},
  cost:{shooter:250,shooterAway:300,reel:50,big:200,fee:.03,warn:.35},
@@ -1079,7 +1079,7 @@ function calcCustom(S,R){
  if(S.film&&S.shoots>0){
   prod+=add('Filming',plural(S.shoots,'shoot')+', '+S.hours+' hrs each',shootPrice(S.hours,R)*R.typeShoot[t]*S.shoots,rec);
   if(S.crew>0)prod+=add('Added crew',plural(S.crew,'crew member')+' on '+plural(S.shoots,'shoot'),S.crew*S.shoots*(S.hours<=4?R.shoot.crewHalf:R.shoot.crewFull),rec);
-  if(S.drone>0)prod+=add('Drone footage',plural(Math.min(S.drone,S.shoots),'shoot')+' with aerials',Math.min(S.drone,S.shoots)*R.extras.drone,rec);
+  if(S.drone>0)prod+=add('Drone footage',plural(Math.min(S.drone,S.shoots),'shoot')+' with aerials',Math.min(S.drone,S.shoots)*(isNp(S)?R.extras.droneNp:R.extras.drone),rec,!isNp(S));
  }
  if(S.edit){
   const items=[['reel',S.nReel,'Reel'],['std',S.nStd,'standard video'],['long',S.nLong,'long-form video'],['feature',S.nFeature,'feature cut']];
@@ -1093,10 +1093,12 @@ function calcCustom(S,R){
  }
  const pre=R.typePre[t];
  if(pre>0&&prod>0)prod+=add('Creative development and pre-production',pctText(pre)+' of production',prod*pre,rec);
- if(S.photos>0)add('Photos and graphics',plural(S.photos,'batch')+' of edited stills',S.photos*R.extras.photos,rec);
- if(S.calls>0)add('Strategy calls',plural(S.calls,'call'),S.calls*R.extras.call,rec);
+ if(S.photos>0){ const npP=S.clientType==='religious', rate=npP?R.extras.photosNp:R.extras.photos, pc=R.extras.photoCount, n=Math.round(S.photos), shown=r5(rate*((R.clientMult[S.clientType]||1)>1?R.clientMult[S.clientType]:1));
+  add('Photos and graphics: 1 batch ('+pc+' edited photos)','Digital gallery. Need more? Each additional batch adds '+pc+' photos for '+money(shown),rate,rec,!npP);
+  if(n>1)add('Additional photo batches','Extra batches of '+pc+' photos each: '+(n-1)+' x '+money(shown)+' = '+(n-1)*pc+' more photos',(n-1)*rate,rec,!npP); }
+ if(S.calls>0)add('Strategy calls',plural(S.calls,'call'),S.calls*(isNp(S)?R.extras.callNp:R.extras.call),rec,!isNp(S));
  if(S.subs&&nVid>0)add('Subtitle files and translations',plural(nVid,'video'),nVid*R.extras.subs,rec);
- if(S.rush&&prod>0)add('Rush turnaround','+'+pctText(R.extras.rush)+' on production and editing',prod*R.extras.rush,rec);
+ if(S.rush&&prod>0)add('Rush turnaround','+'+pctText(rushPct(S,R))+' on production and editing',prod*rushPct(S,R),rec,!isNp(S));
  if(S.manage&&PLATFORMS.some(p=>S.platforms[p])){
   const pc=Math.max(1,PLATFORMS.filter(p=>S.platforms[p]).length);
   const full=S.mgmtLevel==='full';
@@ -1146,7 +1148,7 @@ function calcPackage(S,R){
  }
  if(vOK){ const n=Math.min(R.visits.max,Math.max(0,Math.round(S.pkgVisits)||0));
   if(n){ const base=visitLine(R,0,p), i=items.indexOf(base); if(i>=0)items[i]=visitLine(R,n,p); } }
- if(S.pkgRush)add(rec?'Rush start, first month':'Rush turnaround',rec?'One-time priority fee: +'+pctText(R.extras.rush)+' of the monthly price':'+'+pctText(R.extras.rush),price*R.extras.rush,false);
+ if(S.pkgRush)add(rec?'Rush start, first month':'Rush turnaround',rec?'One-time priority fee: +'+pctText(rushPct(S,R))+' of the monthly price':'+'+pctText(rushPct(S,R)),price*rushPct(S,R),false,!isNp(S));
  if(!p.noDiscount)adjustLines(L,S,R,add);
  if(p.shoot&&!inMetro(S)&&S.travel>0)add('Travel and lodging (estimate)','Final travel is quoted per project',S.travel,rec,false);
  return finish(L,{title:p.name+(rec?' · Monthly':' · One-time'),mode:p.mode,contents:items});
@@ -1207,8 +1209,10 @@ const TIER_ITEMS={
  target:['2 rounds of revisions','Standard scheduling'],
  high:['3 rounds of revisions','Priority scheduling and first in the edit queue','Raw footage delivered with the final files']};
 function tierFactor(k,R){ return k==='low'?R.spread.low:k==='high'?R.spread.high:1; }
+function isNp(S){ return S.clientType==='religious'||(S.tab!=='custom'&&S.pkg==='community'); }
+function rushPct(S,R){ return isNp(S)?R.extras.rushNp:R.extras.rush; }
 function calcTier(S,R,k){
- const res=calc(S,R); const f=tierFactor(k,R);
+ const res=calc(S,R); let f=tierFactor(k,R); { const lp=S.tab!=='custom'&&PKG_BY_ID[S.pkg]; if(lp&&lp.leanMin&&f<lp.leanMin)f=lp.leanMin; }
  if(f!==1)for(const l of res.lines){ if(!/^Travel/.test(l.label))l.amt=r5(l.amt*f); }
  if(res.hardFloor){ const fr=!!res.floorRec; let tot=0; for(const l of res.lines){ if(l.rec===fr&&!/^Travel/.test(l.label))tot+=l.amt; }
   if(tot>0&&tot<res.hardFloor){ const m=res.lines.find(l=>l.label==='Project minimum'&&l.rec===fr); if(m)m.amt+=res.hardFloor-tot; else { const i=res.lines.findIndex(l=>/^Travel/.test(l.label)); const ln={label:'Project minimum',detail:'',amt:res.hardFloor-tot,rec:fr,fee:false}; if(i>=0)res.lines.splice(i,0,ln); else res.lines.push(ln); } } }

@@ -625,6 +625,9 @@ html body .w-cap b{font-size:clamp(13px,1.35vw,19px)!important}
 .qf-quote li.h::before{display:none}
 .qf-quote p{max-width:none; margin:6px 0; font-size:13.5px; color:var(--mute); text-align:left}
 .qf-quote .qq-fine{margin-top:20px; font-size:12.5px; color:var(--mute-2)}
+.qf-quote .qq-pay{margin-top:26px; text-align:center}
+.qf-quote .qq-pay .btn{text-decoration:none}
+.qf-quote .qq-pay p{margin-top:12px; font-size:12.5px; color:var(--mute-2)}
 </style>
 <script type="application/ld+json">
 {
@@ -1376,7 +1379,10 @@ function buildReport(name,email,raw,R){
    const date=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
    const first=(name||'').trim().split(/\s+/)[0]||'there';
    const text='Hi '+first+',\n\nThank you for requesting a quote from Crystal City Productions. Here is the suggested quote based on your answers. We will follow up within one business day to confirm the details and answer any questions.\n\n'+quoteText(res,S,R,date)+'\n\nThis is a suggested quote based on your answers. Final scope and pricing are confirmed with you before any work starts.\n\nCrystal City Productions\ncrystalcityprod.com';
-   return {title:res.title, headline:head, range:(lo&&hi&&lo!==hi)?[lo,hi]:null, contents:res.contents||[], text:text};
+   let pay=null;
+   if(sf.pkgResult && res.lines.length===1){ const pk=sf.pkgResult.pkg, l=res.lines[0], rec=pk.mode==='monthly';
+    if(l.label===pk.name && l.amt===R.pkg[pk.id]) pay={id:pk.id, rec:rec, cents:Math.round(l.amt*100*(rec?1:R.deposit))}; }
+   return {title:res.title, headline:head, range:(lo&&hi&&lo!==hi)?[lo,hi]:null, contents:res.contents||[], text:text, pay:pay};
   }catch(e){ return null; }
  } };
 })();
@@ -1495,6 +1501,22 @@ function buildReport(name,email,raw,R){
   }
   /* Calendly: after the quote is sent, offer a call right on the confirmation screen.
      Name, email and project notes are prefilled so they only pick a time. */
+  /* Stripe Payment Links, one per package (live). amount is in cents: the full first month for monthly retainers, 50% deposit for one-time packages. The Pay button only shows when the on-screen quote is exactly one package line, no adjustments, and its price matches the link's amount. */
+  const PAY_LINKS = {
+    'reels-starter': {url:'https://book.stripe.com/00w8wPcyK4lt9PR6FS57W01', amount:75000},
+    'reels-growth': {url:'https://book.stripe.com/6oU5kDaqC05d7HJ6FS57W02', amount:140000},
+    'content-engine': {url:'https://book.stripe.com/9B614n42e4ltfab0hu57W00', amount:260000},
+    'content-ads': {url:'https://book.stripe.com/5kQ4gzfKWg4baTV2pC57W03', amount:350000},
+    'real-estate': {url:'https://book.stripe.com/8x28wP8iucRZ3rt2pC57W04', amount:305000},
+    'community': {url:'https://book.stripe.com/bJe9ATeGS4lt9PRc0c57W05', amount:240000},
+    'reel-day': {url:'https://book.stripe.com/fZueVd0Q25pxd231ly57W06', amount:67500},
+    'listing': {url:'https://book.stripe.com/14AfZheGS7xF5zB1ly57W07', amount:50000},
+    'event-highlight': {url:'https://book.stripe.com/5kQ8wP1U605d2npfco57W08', amount:62500},
+    'spot': {url:'https://book.stripe.com/bJe4gz0Q23hp6DF6FS57W09', amount:125000},
+    'campaign': {url:'https://book.stripe.com/8x26oHaqCg4b9PR7JW57W0a', amount:260000},
+    'music-video': {url:'https://book.stripe.com/8x29AT6amg4bgeffco57W0b', amount:140000},
+    'mini-doc': {url:'https://book.stripe.com/9B66oH8iu9FNgefggs57W0c', amount:175000}
+  };
   const CAL_URL = 'https://calendly.com/crystalcityprod/30min';
   let calLoaded = false;
   function showBooking(data){
@@ -1538,6 +1560,21 @@ function buildReport(name,email,raw,R){
       cq.contents.forEach(c => add('li', /:$/.test(c) ? 'h' : '', c, ul));
     }
     add('p', 'qq-fine', 'Your full breakdown and terms are in the email we\u2019re sending you. We\u2019ll confirm the scope and final pricing with you within one business day.');
+    const payBox = add('div', 'qq-pay');
+    const pk = cq.pay && PAY_LINKS[cq.pay.id];
+    if(pk && pk.amount === cq.pay.cents){
+      let href = pk.url;
+      const em = String(data['Email'] || '').trim();
+      if(em) href += (href.indexOf('?') > -1 ? '&' : '?') + 'prefilled_email=' + encodeURIComponent(em);
+      const amt = '$' + (pk.amount / 100).toLocaleString('en-US');
+      const a = add('a', 'btn solid', null, payBox); a.href = href; a.rel = 'noopener';
+      add('span', '', cq.pay.rec ? 'Pay ' + amt + ' to book (first month)' : 'Pay ' + amt + ' deposit to book', a);
+      add('p', '', cq.pay.rec ? 'Secure checkout by Stripe. This covers your first month.' : 'Secure checkout by Stripe. The deposit is 50% of the quote.', payBox);
+    } else {
+      const a = add('a', 'btn', null, payBox); a.href = '/call';
+      add('span', '', 'Book a call', a);
+      add('p', '', 'We\u2019ll confirm your final scope and pricing with you on the call.', payBox);
+    }
     box.hidden = false;
     return true;
   }

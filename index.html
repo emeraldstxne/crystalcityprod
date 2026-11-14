@@ -610,6 +610,28 @@ html body .w-cap b{font-size:clamp(13px,1.35vw,19px)!important}
 .w-item.full .w-frame video,.w-item.half .w-frame video,.w-item.wide .w-frame video{object-fit:contain}
 @media (max-width:700px){.w-item.full .w-frame:has(video),.w-item.half .w-frame:has(video),.w-item.wide .w-frame:has(video){aspect-ratio:16/9}}
 @media (max-width:860px){html body h2{font-size:clamp(20px,6.4vw,43px)!important} html body .kind-grid div{font-size:clamp(10.5px,3vw,13.5px)!important}}
+
+/* ===== client-facing suggested quote (confirmation screen) ===== */
+.qf-quote{margin:clamp(26px,3.4vw,40px) auto 0; max-width:680px; text-align:left; padding:clamp(22px,3vw,34px); background:var(--ink-3); border:1px solid var(--ink-line)}
+.qf-quote .eyebrow{display:block; text-align:center; margin-bottom:10px}
+.qf-quote h4{font-family:var(--display); font-weight:200; font-size:clamp(20px,2.4vw,26px); margin:0 0 14px; text-align:center}
+.qf-quote .qq-price{font-family:var(--display); font-weight:200; font-size:clamp(38px,6vw,56px); line-height:1.05; text-align:center; color:var(--gold-lit); letter-spacing:-.01em}
+.qf-quote .qq-range{text-align:center; color:var(--mute); font-size:13.5px; margin:8px auto 0; max-width:none}
+.qf-quote h5{font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--gold); font-weight:500; margin:26px 0 10px}
+.qf-quote ul{list-style:none; margin:0; padding:0; color:var(--mute); font-size:14.5px}
+.qf-quote li{padding:5px 0 5px 18px; position:relative}
+.qf-quote li::before{content:""; position:absolute; left:0; top:13px; width:6px; height:6px; border:1px solid var(--gold); transform:rotate(45deg)}
+.qf-quote li.h{padding-left:0; color:var(--paper); margin-top:8px}
+.qf-quote li.h::before{display:none}
+.qf-quote table{width:100%; border-collapse:collapse; font-size:14.5px}
+.qf-quote td{padding:10px 0; border-top:1px solid var(--ink-line-2); vertical-align:top}
+.qf-quote td:last-child{text-align:right; white-space:nowrap; padding-left:14px; color:var(--paper)}
+.qf-quote td span{display:block}
+.qf-quote td .qq-d{color:var(--mute-2); font-size:12.5px; margin-top:2px}
+.qf-quote tr.neg td:last-child{color:var(--gold)}
+.qf-quote .qq-tot{display:flex; justify-content:space-between; gap:12px; padding:12px 0 0; border-top:1px solid var(--ink-line); font-size:15.5px; color:var(--paper)}
+.qf-quote p{max-width:none; margin:6px 0; font-size:13.5px; color:var(--mute); text-align:left}
+.qf-quote .qq-fine{margin-top:20px; font-size:12.5px; color:var(--mute-2)}
 </style>
 <script type="application/ld+json">
 {
@@ -856,10 +878,11 @@ html body .w-cap b{font-size:clamp(13px,1.35vw,19px)!important}
         <div class="mark"></div>
         <h3>Request received.</h3>
         <p id="qfDoneMsg" class="lede" style="margin:14px auto 0"></p>
+        <div class="qf-quote" id="qfQuote" hidden></div>
         <div class="qf-book" id="qfBook" hidden>
           <span class="eyebrow center" id="qfBookEye">Want to move faster?</span>
           <h4 id="qfBookTitle">Book a 30-minute call.</h4>
-          <p>Pick a time that works and we&rsquo;ll walk through your answers together, so your quote is dialed in before it lands in your inbox.</p>
+          <p>Pick a time that works and we&rsquo;ll walk through your answers together, so we can lock in your final quote together.</p>
           <div class="qf-cal" id="qfCal"></div>
           <p class="qf-book-alt">Calendar not loading? <a href="https://calendly.com/crystalcityprod/30min" target="_blank" rel="noopener">Open it in a new tab</a>.</p>
         </div>
@@ -1328,7 +1351,23 @@ function buildReport(name,email,raw,R){
  out['11. Note']='The numbers above are an automated suggestion to save you a step — sanity-check before replying.';
  return out;
 }
- return { buildReport: function(name,email,raw){ const R=JSON.parse(JSON.stringify(DEFAULTS)); return buildReport(name,email,raw,R); } };
+ return { buildReport: function(name,email,raw){ const R=JSON.parse(JSON.stringify(DEFAULTS)); return buildReport(name,email,raw,R); },
+ clientQuote: function(name,email,raw){
+  try{
+   const R=JSON.parse(JSON.stringify(DEFAULTS));
+   const sf=suggestFromForm(raw,R); const p=sf.pkgResult||sf.customResult;
+   if(!p||!p.res||!p.res.lines.length) return null;
+   const S=Object.assign({},p.state,{client:name||''});
+   const res=calcTier(S,R,'target'); if(!res.lines.length) return null;
+   const pt=r=>[r.once>0?money(r.once):'',r.rec>0?money(r.rec)+'/mo':''].filter(Boolean).join(' + ');
+   const lo=pt(calcTier(S,R,'low')), hi=pt(calcTier(S,R,'high')), head=pt(res);
+   const date=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+   const first=(name||'').trim().split(/\s+/)[0]||'there';
+   const text='Hi '+first+',\n\nThank you for requesting a quote from Crystal City Productions. Here is the suggested quote based on your answers. We will follow up within one business day to confirm the details and answer any questions.\n\n'+quoteText(res,S,R,date)+'\n\nThis is a suggested quote based on your answers. Final scope and pricing are confirmed with you before any work starts.\n\nCrystal City Productions\ncrystalcityprod.com';
+   const totals=[]; if(res.once>0)totals.push({label:'Project total',value:money(res.once)}); if(res.rec>0)totals.push({label:'Monthly',value:money(res.rec)+' a month'});
+   return {title:res.title, headline:head, range:(lo&&hi&&lo!==hi)?[lo,hi]:null, contents:res.contents||[], lines:res.lines.map(l=>({label:l.label,detail:l.detail||'',amt:money(l.amt)+(l.rec?'/mo':''),neg:l.amt<0})), totals:totals, terms:termsList(res,R), text:text};
+  }catch(e){ return null; }
+ } };
 })();
 
 (function(){
@@ -1420,6 +1459,18 @@ function buildReport(name,email,raw,R){
      submission already triggers — never a second message. If the pricing
      engine hiccups for any reason, the plain submission still goes through
      untouched; a quote suggestion is a bonus, not a requirement. */
+  /* Client copy: FormSubmit's _autoresponse emails the submitter the quote text.
+     It carries only the client-safe quote (no profit math, no internal notes). */
+  function withClientCopy(payload, data){
+    try{
+      const cq = CCQuote.clientQuote(data['Name'], data['Email'], collectRaw());
+      if(!cq) return payload;
+      const out = Object.assign({}, payload);
+      out['email'] = data['Email'];
+      out['_autoresponse'] = cq.text;
+      return out;
+    }catch(e){ return payload; }
+  }
   function withSuggestedQuote(data){
     try{
       const report = CCQuote.buildReport(data['Name'], data['Email'], collectRaw());
@@ -1459,6 +1510,26 @@ function buildReport(name,email,raw,R){
       }
     });
   }
+  function renderQuote(data){
+    const box = document.getElementById('qfQuote');
+    if(!box || !data) return false;
+    const cq = CCQuote.clientQuote(data['Name'], data['Email'], collectRaw());
+    if(!cq){ box.hidden = true; return false; }
+    box.textContent = '';
+    const add = (tag, cls, txt, parent) => { const n = document.createElement(tag); if(cls) n.className = cls; if(txt != null) n.textContent = txt; (parent || box).appendChild(n); return n; };
+    add('span', 'eyebrow center', 'Your suggested quote');
+    add('h4', '', cq.title);
+    add('div', 'qq-price', cq.headline);
+    if(cq.range) add('p', 'qq-range', 'Typical range for this scope: ' + cq.range[0] + ' to ' + cq.range[1]);
+    if(cq.contents.length){
+      add('h5', '', 'What\u2019s included');
+      const ul = add('ul');
+      cq.contents.forEach(c => add('li', /:$/.test(c) ? 'h' : '', c, ul));
+    }
+    add('p', 'qq-fine', 'Your full breakdown and terms are in the email we\u2019re sending you. We\u2019ll confirm the scope and final pricing with you within one business day.');
+    box.hidden = false;
+    return true;
+  }
   function finish(mode, email, data){
     qf.classList.add('sent');
     const msg = document.getElementById('qfDoneMsg');
@@ -1467,6 +1538,7 @@ function buildReport(name,email,raw,R){
     } else {
       msg.innerHTML = 'Thank you. We&rsquo;ll send your custom quote to <b style="font-weight:400;color:var(--paper)"></b> within one business day.';
       msg.querySelector('b').textContent = email;
+      if(renderQuote(data)){ msg.innerHTML = 'Thank you. Your suggested quote is below, and we&rsquo;re emailing a copy to <b style="font-weight:400;color:var(--paper)"></b>. We&rsquo;ll follow up within one business day to confirm the details.'; msg.querySelector('b').textContent = email; }
     }
     showBooking(data);
     qf.scrollIntoView({behavior:'smooth', block:'start'});
@@ -1480,7 +1552,7 @@ function buildReport(name,email,raw,R){
     if(QUOTE_ENDPOINT){
       try{
         const r = await fetch(QUOTE_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json', 'Accept':'application/json'},
-          body: JSON.stringify(withSuggestedQuote(data))});
+          body: JSON.stringify(withClientCopy(withSuggestedQuote(data), data))});
         if(!r.ok) throw new Error(r.status);
         finish('sent', data['Email'], data);
       }catch(x){

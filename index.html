@@ -1028,7 +1028,7 @@ const DEFAULTS={
  ads:{min:750,pct:.15},
  extras:{photos:300,photosNp:150,photoCount:10,call:150,subs:15,drone:200,rush:.25,callNp:100,droneNp:100,rushNp:.15},
  travel:{other:750},
- clientMult:{local:1,realestate:1,religious:.9,creator:.95,brand:1.15,other:1},
+ clientMult:{local:1,realestate:1,religious:.8,creator:.95,brand:1.15,other:1},
  cost:{shooter:250,shooterAway:300,reel:50,big:200,fee:.03,warn:.35},
  visits:{minPrice:2400,minPriceNp:2100,max:4,hours:2},
  minProject:750,
@@ -1064,7 +1064,7 @@ function finish(L,extra){
 
 function adjustLines(L,S,R,add){
  const mult=R.clientMult[S.clientType]; if(!mult||mult===1)return;
- if(mult>1){ for(const l of L){ if(l.fee)l.amt=r5(l.amt*mult); } return; }
+ if(mult>1||S.hideRate){ for(const l of L){ if(l.fee)l.amt=r5(l.amt*mult); } return; }
  const label='Community / client rate (−'+Math.round((1-mult)*100)+'%)';
  let so=0,sr=0; for(const l of L){ if(l.fee){ if(l.rec)sr+=l.amt; else so+=l.amt; } }
  if(so)add(label,'',so*(mult-1),false,false);
@@ -1396,7 +1396,7 @@ function buildReport(name,email,raw,R){
    const R=JSON.parse(JSON.stringify(DEFAULTS));
    const sf=suggestFromForm(raw,R); const p=sf.pkgResult||sf.customResult;
    if(!p||!p.res||!p.res.lines.length) return null;
-   const S=Object.assign({},p.state,{client:name||''});
+   const S=Object.assign({},p.state,{client:name||'',hideRate:true});
    const res=calcTier(S,R,'target'); if(!res.lines.length) return null;
    const pt=r=>[r.once>0?money(r.once):'',r.rec>0?money(r.rec)+'/mo':''].filter(Boolean).join(' + ');
    const lo=pt(calcTier(S,R,'low')), hi=pt(calcTier(S,R,'high')), head=pt(res);
